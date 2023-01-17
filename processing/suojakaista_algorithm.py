@@ -68,6 +68,7 @@ class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
     # calling from the QGIS console.
 
     OUTPUT = 'OUTPUT'
+    PINTAALA = 'PINTAALA'
     VAIKUTUS = 'VAIKUTUS'
     INPUT = 'INPUT'
 
