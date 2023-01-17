@@ -1,4 +1,4 @@
-# This file contains metadata for your plugin.
+﻿# This file contains metadata for your plugin.
 
 # This file should be included when you package your plugin.# Mandatory items:
 
@@ -6,14 +6,14 @@
 name=smk_tools
 qgisMinimumVersion=3.0
 description=Suomen metsäkeskuksen työkalut
-version=0.1
+version=0.2
 author=Suomen metsäkeskus
 email=mikko.kesala@metsakeskus.fi
 
 about=Provide a brief description of the plugin and its purpose.
 
 tracker=http://bugs
-repository=http://repo
+repository=https://github.com/MikkoKesala/smk_tools
 # End of mandatory metadata
 
 # Recommended items:
@@ -44,4 +44,5 @@ Category of the plugin: Raster, Vector, Database or Web
 
 # If the plugin can run on QGIS Server.
 server=False
+
 
