@@ -6,6 +6,6 @@
      <qgis_minimum_version>3.0</qgis_minimum_version>
      <file_name>smk_tools.zip</file_name>
      <author_name>MikkoKesala</author_name>
-     <download_url>https://github.com/MikkoKesala/smk_tools/blob/main/smk_tools.zip</download_url>
+     <download_url>https://github.com/MikkoKesala/smk_tools/raw/main/smk_tools.zip</download_url>
  </pyqgis_plugin>
 </plugins>
