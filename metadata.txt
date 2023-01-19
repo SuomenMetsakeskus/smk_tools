@@ -10,9 +10,9 @@ version=0.2
 author=Suomen metsäkeskus
 email=mikko.kesala@metsakeskus.fi
 
-about=Provide a brief description of the plugin and its purpose.
+about=testi
 
-tracker=http://bugs
+tracker=https://github.com/MikkoKesala/smk_tools
 repository=https://github.com/MikkoKesala/smk_tools
 # End of mandatory metadata
 
@@ -23,9 +23,9 @@ hasProcessingProvider=yes
 # changelog=
 
 # Tags are comma separated with spaces allowed
-tags=python
+tags=forest
 
-homepage=http://homepage
+homepage=https://www.metsakeskus.fi/fi
 category=Analysis
 icon=icon.png
 # experimental flag
