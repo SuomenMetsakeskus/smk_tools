@@ -4,7 +4,7 @@ from osgeo import gdal,gdal_array
 import pandas as pd
 import numpy as np
 from math import sqrt,pow
-import json,warnings
+import json
 from qgis.PyQt.QtCore import QVariant
 from paras_2 import decay_tree_potential,NP_retention
 import matplotlib.pyplot as plt
@@ -590,6 +590,24 @@ def optimizeRetentioTrees(in_feat,leimArea,treec):
     #clone.dataProvider().deleteFeatures(noReTree)
 
     #return clone
+def cleanResults(puukartta: QgsVectorLayer):
+    handle = puukartta.clone()
+
+    NoReten = [feat.id() for feat in handle.getFeatures() if feat['reTree']==0]
+    handle.dataProvider().deleteFeatures(NoReten)
+    handle.updateFields()
+    
+    """ 1: delaunay kolmiointi 2: valitse jossa extent xmax - xmin ja ymax - ymin > 20 3: dissolve geometria 4: moniosaiset yksiosaisksi (5: laske keskiarvot)"""
+
+    """ 
+    conc = processing.run("qgis:concavehull", 
+            {'INPUT':handle,'ALPHA':0.2,'HOLES':False,'NO_MULTIGEOMETRY':False,'OUTPUT':'TEMPORARY_OUTPUT'})
+            
+    buf = processing.run("native:buffer", {'INPUT':handle,'DISTANCE':2,'SEGMENTS':5,'END_CAP_STYLE':0,'JOIN_STYLE':0,'MITER_LIMIT':2,'DISSOLVE':False,'OUTPUT':'TEMPORARY_OUTPUT'})
+    """
+
+    #merge
+
 def makeRetentionGraph(puukartta,graafi):
     if graafi == "":
         graafi = tempfile.TemporaryFile()
