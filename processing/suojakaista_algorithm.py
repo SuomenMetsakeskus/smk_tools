@@ -72,7 +72,7 @@ class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
     VAIKUTUS = 'VAIKUTUS'
     INPUT = 'INPUT'
 
-    pnimet = ['suojakaista_taustarasterit','RUSLE','MassataseGISSUS','WB_Finland'] #taustarastereissa band1 = costdistance ; band2 = euclidean ; band3 = lsn
+    pnimet = ['suojakaista_taustarasterit','RUSLE','MassataseGISSUS','WB_Finland','DEM'] #taustarastereissa band1 = costdistance ; band2 = euclidean ; band3 = lsn
 
 
     def initAlgorithm(self, config):

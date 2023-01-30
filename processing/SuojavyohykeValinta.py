@@ -1,4 +1,4 @@
-import os,json
+import os,sys,subprocess
 import numpy as np
 import pandas as pd
 from osgeo import gdal,gdal_array
@@ -8,13 +8,20 @@ from saastopuu import getBboxWmsFormat
 from qgis.core import QgsVectorLayer,QgsField,QgsFeature,edit
 import processing
 import matplotlib.pyplot as plt
+from math import sqrt
+
+try:
+    from whitebox.whitebox_tools import WhiteboxTools
+except:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "whitebox"])
+
 
 #inp = r'S:/Luontotieto/QGIS_plugin_test/testitasot.gpkg|layername=suojakaistaLeim'
 #inp = QgsVectorLayer(inp,"input","ogr")
 #outr = 'S:/Luontotieto/QGIS_plugin_test/testirrr.tif'
 #out = QgsRasterLayer(outr,"outrast")
-pnimet = ['suojakaista_taustarasterit','RUSLE','MassataseGISSUS','WB_Finland'] #taustarastereissa band1 = costdistance ; band2 = euclidean ; band3 = lsn
-
+pnimet = ['suojakaista_taustarasterit','RUSLE','MassataseGISSUS','WB_Finland','DEM'] #taustarastereissa band1 = costdistance ; band2 = euclidean ; band3 = lsn
+wbt = WhiteboxTools()
 
 def getWater(input_polygon,taso):
     tempd = tempfile.TemporaryFile()
@@ -179,6 +186,49 @@ def array2raster(in_array,map_raster):
     gdal_array.SaveArray(in_array.astype("float32"),tempd,"GTiff",map_raster)
 
     return tempd
+
+def calcFocal(in_array,etai):
+
+    dat =pd.DataFrame(in_array)
+    vert = dat
+    ijlist = []
+    for i in range(0-etai,etai):
+        for j in range(0-etai,etai):
+            e = sqrt(pow(i,2)+pow(j,2))
+            if e <=etai:
+                ijlist.append((i,j))
+    
+    for i in ijlist:
+        df = dat.shift(i[0],axis=0)
+        df = df.shift(i[1],axis=1)
+        vert = pd.concat([vert,df]).max(level=0)
+    t = []
+    t.append(vert)
+    t = np.array(t)
+
+    return t
+
+def processRaster(input):
+    
+    rastOut = input[0:-4]+"hh.tif"
+    rast = gdal.Open(input)
+    
+    rastb = rast.GetRasterBand(1)
+    rastA = rastb.ReadAsArray()
+    rastA = np.where(rastA>0,rastA,0)
+    
+
+    focal = calcFocal(rastA,2)
+    #huip = focal - chmA
+    huip = np.where(focal-rastA==2,1,0)
+    #huip = np.where(huip>=5,huip*10,np.NaN)
+    print (huip)
+    print (np.max(huip))
+    gdal_array.SaveArray(huip.astype("float32"),rastOut,"GTiff",rast)
+    #gdal.Open(rastOut).GetRasterBand(1).SetNoDataValue(-9999)
+    
+    return rastOut
+
 def massfluxgraph(all):
     graafi = tempfile.TemporaryFile()
     graafi = graafi.name+'.png'
@@ -191,11 +241,81 @@ def massfluxgraph(all):
     
     return graafi
 
+def clipRaster(in_raster,clip_raster):
+    
+    output = os.path.dirname(os.path.realpath(in_raster))
+    output = os.path.join(output,"clipped.tif")
+    
+    
+    in_arr = raster2Array(in_raster,1)
+    cl_arr = raster2Array(clip_raster,1)
+    
+    in_arr = np.where(cl_arr>0,in_arr,0)
+    
+    gdal_array.SaveArray(in_arr.astype("float32"),output,"GTiff",in_raster)
+    
+    return output
+
+def my_callback(value):
+    if not "%" in value:
+        print(value)
+
+def wbtBreachDepression(dem):
+    #wbt = WhiteboxTools()
+    output = os.path.dirname(os.path.realpath(dem))
+    output = os.path.join(output,"dem_br.tif")
+    
+    wbt.breach_depressions(
+        dem,
+        output,
+        max_depth=None,
+        max_length=None,
+        flat_increment=None,
+        fill_pits=False,
+        callback=my_callback
+    )
+    
+    return output
+
+def wbtD8Pointer(dem):
+    output = os.path.dirname(os.path.realpath(dem))
+    output = os.path.join(output,"d8_br.tif")
+    
+    wbt.d8_pointer(
+        dem, 
+        output,
+        esri_pntr = True,
+        callback=my_callback
+        )
+    return output
+
+def wbtWatershed(d8,pour_pts):
+    output = os.path.dirname(os.path.realpath(d8))
+    output = os.path.join(output,"watershed.tif")
+    wbt.watershed(
+        d8, 
+        pour_pts, 
+        output, 
+        esri_pntr=True, 
+        callback=my_callback
+    )
+    return output
+
 def bufferzone(logging,rasters,target):
     zraster = raster2Array(rasters[0],1)
     lraster = rasterizeVector(logging,2)
     lraster = raster2Array(lraster,1)
-    lzone = np.where((zraster!=0) & (lraster!=0),lraster,0)
+
+    wline = processRaster(rasters[3])
+    lrast_clip = clipRaster(wline,lraster)
+
+    dem_bd = wbtBreachDepression(rasters[4])
+    d8 = wbtD8Pointer(dem_bd)
+    waters = wbtWatershed(d8,lrast_clip)
+
+    wshed_arr = raster2Array(waters)
+    lzone = np.where((zraster!=0) & (lraster!=0) & (wshed_arr>0),lraster,0)
+
     
     d1=[]
     arl =[]
