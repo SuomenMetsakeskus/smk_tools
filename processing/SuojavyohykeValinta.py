@@ -9,11 +9,7 @@ from qgis.core import QgsVectorLayer,QgsField,QgsFeature,edit
 import processing
 import matplotlib.pyplot as plt
 from math import sqrt
-
-try:
-    from whitebox.whitebox_tools import WhiteboxTools
-except:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "whitebox"])
+from whitebox.whitebox_tools import WhiteboxTools
 
 
 #inp = r'S:/Luontotieto/QGIS_plugin_test/testitasot.gpkg|layername=suojakaistaLeim'

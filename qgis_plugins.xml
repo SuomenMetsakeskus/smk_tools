@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <plugins>
- <pyqgis_plugin name="smk_tools" version="0.2">
+ <pyqgis_plugin name="smk_tools" version="0.2.1">
      <description>Suomen metsäkeskuksen työkalut</description>
      <homepage>https://github.com/MikkoKesala/smk_tools</homepage>
      <qgis_minimum_version>3.0</qgis_minimum_version>
