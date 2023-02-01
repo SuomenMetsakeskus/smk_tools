@@ -98,6 +98,7 @@ def rasterizeVector(in_layer,cells):
     return tempd
 
 def raster2Array(in_raster,band):
+    
     rast = gdal.Open(in_raster)
     rastB = rast.GetRasterBand(band)
     rastA = rastB.ReadAsArray()
@@ -238,10 +239,9 @@ def massfluxgraph(all):
     return graafi
 
 def clipRaster(in_raster,clip_raster):
-    
-    output = os.path.dirname(os.path.realpath(in_raster))
-    output = os.path.join(output,"clipped.tif")
-    
+
+    output = tempfile.TemporaryFile()
+    output = output.name+'.tif'    
     
     in_arr = raster2Array(in_raster,1)
     cl_arr = raster2Array(clip_raster,1)
@@ -275,7 +275,7 @@ def wbtBreachDepression(dem):
 
 def wbtD8Pointer(dem):
     output = os.path.dirname(os.path.realpath(dem))
-    output = os.path.join(output,"d8_br.tif")
+    output = os.path.join(output,"d8.tif")  
     
     wbt.d8_pointer(
         dem, 
@@ -283,11 +283,12 @@ def wbtD8Pointer(dem):
         esri_pntr = True,
         callback=my_callback
         )
+    
     return output
 
 def wbtWatershed(d8,pour_pts):
     output = os.path.dirname(os.path.realpath(d8))
-    output = os.path.join(output,"watershed.tif")
+    output = os.path.join(output,"watshed.tif")    
     wbt.watershed(
         d8, 
         pour_pts, 
@@ -300,16 +301,18 @@ def wbtWatershed(d8,pour_pts):
 def bufferzone(logging,rasters,target):
     zraster = raster2Array(rasters[0],1)
     lraster = rasterizeVector(logging,2)
-    lraster = raster2Array(lraster,1)
-
+    
     wline = processRaster(rasters[3])
     lrast_clip = clipRaster(wline,lraster)
 
+    lraster = raster2Array(lraster,1)
+    print (rasters[4])
     dem_bd = wbtBreachDepression(rasters[4])
     d8 = wbtD8Pointer(dem_bd)
     waters = wbtWatershed(d8,lrast_clip)
 
-    wshed_arr = raster2Array(waters)
+    wshed_arr = raster2Array(waters,1)
+    #wshed_arr = np.where((wshed_arr>0) or (r))
     lzone = np.where((zraster!=0) & (lraster!=0) & (wshed_arr>0),lraster,0)
 
     
