@@ -1,16 +1,11 @@
-from osgeo import gdal,gdal_array
-import geopandas as gpd
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-import requests,tempfile,os
+from osgeo import gdal_array
+import tempfile
 import numpy as np
-import sys,subprocess
 import pandas as pd
 from math import sqrt,pow
 
 from waterLine import raster2Array
 from qgis.core import *
-from qgis.analysis import QgsNativeAlgorithms
 from qgis.PyQt.QtCore import QVariant
 import processing
 
@@ -100,8 +95,8 @@ def raster2vector(in_rast,data):
             if feat['DN'] == 0:
                 vect.deleteFeature(feat.id())
 
-            if max(arealist) - feat.geometry().area() > 100:
-                vect.deleteFeature(feat.id())
+            #if max(arealist) - feat.geometry().area() > 100:
+             #   vect.deleteFeature(feat.id())
 
             for i in namelist:
                 datac = data[[i]]
@@ -166,7 +161,7 @@ def getBufferzone(rasters,clipraster,waterborder,dist,target):
         mf = getMassSum(mf,waterborder)
         
         effect = getEffect(mf,mfmin,mfmax)
-        if (effect[3] > target and mdist > dist[1]):
+        if (mdist > dist[1]):
             break
         
     bzone = np.where((cuttarr==1) & (ls_fact<1),1,0)

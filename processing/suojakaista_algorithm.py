@@ -105,7 +105,7 @@ class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
                 minValue=40,maxValue=95,defaultValue=70
             )
             )
-
+        """
         self.addParameter(
             QgsProcessingParameterNumber(
                 self.AREA,
@@ -114,7 +114,7 @@ class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
                 minValue=5,maxValue=70,defaultValue=10
             )
             )
-
+        """
         self.addParameter(
             QgsProcessingParameterNumber(
                 self.MEANDIST,
@@ -140,9 +140,8 @@ class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
                 minValue=10,maxValue=100,defaultValue=60
             )
             )
-        # We add a feature sink in which to store our processed features (this
-        # usually takes the form of a newly created vector layer when the
-        # algorithm is run in QGIS).
+        
+
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT,
@@ -162,7 +161,7 @@ class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
         if source.featureCount() > 20:
             feedback.reportError("Input layer has too many features. 20 dissolved features is maximum. Process failed.")
             sys.exit()
-
+        
         #feedback.pushInfo(str(parameters['INPUT']))
         source = processing.run("native:dissolve", {'INPUT':parameters['INPUT'],'FIELD':[],'OUTPUT':'TEMPORARY_OUTPUT'})
         source = source['OUTPUT']
