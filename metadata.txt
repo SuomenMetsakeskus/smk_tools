@@ -10,7 +10,7 @@
 name=smk_tools
 qgisMinimumVersion=3.0
 description=Find the retention tree groups and riparian buffer zone area with given polygon
-version=0.2.3
+version=0.3
 author=MikkoKesala
 email=mikko.kesala@metsakeskus.fi
 
@@ -26,7 +26,7 @@ repository=https://github.com/MikkoKesala/smk_tools
 # changelog=
 
 # Tags are comma separated with spaces allowed
-tags=forest
+tags=forest,metsäkeskus,
 
 # The plugin is compatible with qgis_process
 hasProcessingProvider=yes
@@ -39,6 +39,3 @@ experimental=False
 
 # deprecated flag (applies to the whole plugin, not just a single version)
 deprecated=False
-
-plugin_dependencies=WhiteboxTools for QGIS
-pip_dependencies=whitebox

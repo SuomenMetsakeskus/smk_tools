@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <plugins>
- <pyqgis_plugin name="smk_tools" version="0.2.3">
+ <pyqgis_plugin name="smk_tools" version="0.3">
      <description>Suomen metsäkeskuksen työkalut</description>
-     <homepage>https://github.com/MikkoKesala/smk_tools</homepage>
+     <homepage>https://www.metsakeskus.fi/fi/avoin-metsa-ja-luontotieto/aineistot-paikkatieto-ohjelmille/tyokalut</homepage>
      <qgis_minimum_version>3.0</qgis_minimum_version>
      <file_name>smk_tools.zip</file_name>
      <author_name>MikkoKesala</author_name>
