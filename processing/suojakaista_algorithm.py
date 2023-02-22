@@ -39,8 +39,11 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterNumber,
                        QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink)
-from SuojavyohykeValinta import getWater,bufferzone,feature2layer
-from PIL import Image
+#from get feature2layer
+from getInput import getWater,feature2layer
+from bufferZone import getBufferzone
+from waterLine import getWaterline
+#from PIL import Image
 import processing
 #from sys import exit
 
@@ -68,11 +71,14 @@ class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
     # calling from the QGIS console.
 
     OUTPUT = 'OUTPUT'
-    PINTAALA = 'PINTAALA'
-    VAIKUTUS = 'VAIKUTUS'
+    MINDIST = 'MINDIST'
+    MEANDIST = 'MEANDIST'
+    MAXDIST = 'MAXDIST'
+    AREA = 'AREA'
+    COST = 'COST'
     INPUT = 'INPUT'
 
-    pnimet = ['suojakaista_taustarasterit','RUSLE','MassataseGISSUS','WB_Finland','DEM'] #taustarastereissa band1 = costdistance ; band2 = euclidean ; band3 = lsn
+    interface_name = ['suojakaista_taustarasterit','RUSLE','MassataseGISSUS','WB_Finland','DEM'] #taustarastereissa band1 = costdistance ; band2 = euclidean ; band3 = lsn
 
 
     def initAlgorithm(self, config):
@@ -93,10 +99,45 @@ class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
 
         self.addParameter(
             QgsProcessingParameterNumber(
-                self.VAIKUTUS,
+                self.COST,
                 self.tr('Pidätyksen vaikutusprosentti (%)'),
                 type=QgsProcessingParameterNumber.Integer,
                 minValue=40,maxValue=95,defaultValue=70
+            )
+            )
+
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.AREA,
+                self.tr('Suojakaistan maksimipinta-ala leimikosta (%)'),
+                type=QgsProcessingParameterNumber.Integer,
+                minValue=5,maxValue=70,defaultValue=10
+            )
+            )
+
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.MEANDIST,
+                self.tr('Suojakaistan keskileveyden minimi (m)'),
+                type=QgsProcessingParameterNumber.Integer,
+                minValue=5,maxValue=50,defaultValue=10
+            )
+            )
+
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.MINDIST,
+                self.tr('Suojakaistan minimileveys (m)'),
+                type=QgsProcessingParameterNumber.Integer,
+                minValue=5,maxValue=20,defaultValue=7
+            )
+            )
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.MAXDIST,
+                self.tr('Suojakaistan maksimileveys (m)'),
+                type=QgsProcessingParameterNumber.Integer,
+                minValue=10,maxValue=100,defaultValue=60
             )
             )
         # We add a feature sink in which to store our processed features (this
@@ -132,13 +173,18 @@ class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
         total = 100.0 / source.featureCount() if source.featureCount() else 0
         
         features = source.getFeatures()
-        vaik = self.parameterAsInt(parameters,self.VAIKUTUS,context)
+        cost = self.parameterAsInt(parameters,self.COST,context)
+        mindist = self.parameterAsInt(parameters,self.MINDIST,context)
+        meandist = self.parameterAsInt(parameters,self.MEANDIST,context)
+        maxdist = self.parameterAsInt(parameters,self.MAXDIST,context)
+        dist = (mindist,meandist,maxdist)
+        
         for current, feature in enumerate(features):
             # Stop the algorithm if cancel button has been clicked
             if feedback.isCanceled():
                 break
             rasterit = []
-            for i in self.pnimet:
+            for i in self.interface_name:
                 #print (i)
                 f = feature2layer(feature)
                 rast = getWater(f,i)
@@ -146,18 +192,19 @@ class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
                 rasterit.append(rast)
                 #exit
 
-            out = [f]
-            out = bufferzone(f,rasterit,vaik)
+            waterline = getWaterline(rasterit,f)
+            
+            out = getBufferzone(rasterit,waterline[1],waterline[0],dist,cost)
             
             # Add a feature in the sink
             if current == 0:
                 (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
-                context, out[0].fields(), out[0].wkbType(), out[0].sourceCrs())
-            feedback.pushInfo(str(out[0].fields().names()))
-            for outfeat in out[0].getFeatures():
+                context, out.fields(), out.wkbType(), out.sourceCrs())
+            feedback.pushInfo(str(out.fields().names()))
+            for outfeat in out.getFeatures():
                 sink.addFeature(outfeat, QgsFeatureSink.FastInsert)
-            g = Image.open(out[1])
-            g.show()
+            #g = Image.open(out[1])
+            #g.show()
             # Update the progress bar
             feedback.setProgress(int(current * total))
 
