@@ -45,7 +45,7 @@ def getWater(input_polygon:QgsVectorLayer,taso):
     return tempd
 
 def feature2layer(feature):
-    vl = QgsVectorLayer("Polygon", "temporary_pol", "memory")
+    vl = QgsVectorLayer("Polygon", "temporary_pol","memory")
     pr = vl.dataProvider()
     # Enter editing mode
     vl.startEditing()
@@ -57,5 +57,6 @@ def feature2layer(feature):
     pr.addFeatures( [ fet ] )
     
     vl.commitChanges()
-
+    vl.updateExtents()
+    
     return vl

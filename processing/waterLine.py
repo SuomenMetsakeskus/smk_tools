@@ -8,7 +8,7 @@ from qgis.core import *
 from qgis.PyQt.QtCore import QVariant
 from getInput import getBboxWmsFormat
 import processing
-
+from fcFunctions import array2raster,raster2vector,clipRaster,raster2Array,cleanGeom
 
 def calcFocal(in_array,etai):
 
@@ -47,37 +47,32 @@ def processRaster(input):
     return rastOut
 
 
+def snap2water(waterraster,area):
+    waterarr = raster2Array(waterraster,1)
+    waterarr = np.where(waterarr>1,1,0)
 
-def clipRaster(in_raster,band,clip_raster,band_clip):
-    
-    output = os.path.dirname(os.path.realpath(in_raster))
-    output = os.path.join(output,"clipped.tif")
-    
-    
-    in_arr = raster2Array(in_raster,band)
-    cl_arr = raster2Array(clip_raster,band_clip)
-    
-    in_arr = np.where((cl_arr>0) & (in_arr>0),in_arr,0)
-    
-    gdal_array.SaveArray(in_arr.astype("float32"),output,"GTiff",in_raster)
-    
-    return output
+    water = array2raster(waterarr,waterraster)
 
-def raster2Array(in_raster,band):
-    rast = gdal.Open(in_raster)
-    rastB = rast.GetRasterBand(band)
-    rastA = rastB.ReadAsArray()
+    data = {'cutarea':[1]}
+    dat = pd.DataFrame(data)
+    water = raster2vector(water,dat)
+    
+    snapped = processing.run("native:snapgeometries",
+                             {'INPUT':area,
+                              'REFERENCE_LAYER':water,'TOLERANCE':10,
+                              'BEHAVIOR':1,
+                              'OUTPUT':'TEMPORARY_OUTPUT'})
+    
+    cleanGeom(snapped['OUTPUT'])
 
-    return rastA
+    return snapped['OUTPUT']
 
-def rasterizeVector(in_layer,cells):
-    #print ("jee")
+def rasterizeVector(in_layer,gdal_extent,cells):
+    
     output = os.path.dirname(os.path.realpath(in_layer.sourceName()))
     output = os.path.join(output,"rasterized.tif")
 
-    bbox = getBboxWmsFormat(in_layer)
-    ss = bbox[0].split(',')
-    extent = str(round(int(ss[0])-100,-1))+","+str(round(int(ss[2])+100,-1))+","+str(round(int(ss[1])-100,-1))+","+str(round(int(ss[3])+100,-1))+" ["+str(bbox[1])+"]"
+
     processing.run("gdal:rasterize",
                         {'INPUT':in_layer,
                         'FIELD':'',
@@ -86,7 +81,7 @@ def rasterizeVector(in_layer,cells):
                         'UNITS':1,
                         'WIDTH':cells,
                         'HEIGHT':cells,
-                        'EXTENT':extent,
+                        'EXTENT':gdal_extent,
                         'NODATA':0,
                         'OPTIONS':'',
                         'DATA_TYPE':5,
@@ -99,10 +94,14 @@ def rasterizeVector(in_layer,cells):
 
 
 def getWaterline(rasters,leimikko):
-
+    bbox = getBboxWmsFormat(leimikko)
+    ss = bbox[0].split(',')
+    extent = str(round(int(ss[0])-100,-1))+","+str(round(int(ss[2])+100,-1))+","+str(round(int(ss[1])-100,-1))+","+str(round(int(ss[3])+100,-1))+" ["+str(bbox[1])+"]"
+    
+    leimikko = snap2water(rasters[3],leimikko)
     vraster = processRaster(rasters[3]) #vesistörajan määritys
 
-    leimraster = rasterizeVector(leimikko,2)
+    leimraster = rasterizeVector(leimikko,extent,2)
     vrast_clip = clipRaster(vraster,1,leimraster,1) # rajataan leimikkoon
     #leimraster = clipRaster()
     leimraster = clipRaster(leimraster,1,rasters[0],2)

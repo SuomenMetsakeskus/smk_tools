@@ -4,28 +4,46 @@ import numpy as np
 import pandas as pd
 from math import sqrt,pow
 
-from waterLine import raster2Array
+from fcFunctions import raster2Array,array2raster,raster2vector
 from qgis.core import *
 from qgis.PyQt.QtCore import QVariant
 import processing
 
 
 def fillSink(elev):
-    
+    tempd = tempfile.TemporaryFile()
+    tempd = tempd.name+'.tif'
+    processing.run("wbt:FillDepressions", 
+                   {'dem':elev,
+                    'fix_flats':True,
+                    'flat_increment':None,
+                    'max_depth':None,
+                    'output':tempd})
 
-    dem = processing.run("saga:fillsinkswangliu",
+    """
+    processing.run("saga:fillsinkswangliu",
                    {'ELEV':elev,
-                    'FILLED':'TEMPORARY_OUTPUT',
+                    'FILLED':tempd,
                     'FDIR':'TEMPORARY_OUTPUT',
                     'WSHED':'TEMPORARY_OUTPUT',
                     'MINSLOPE':0.1})
-    
-    return dem['FILLED']
+    """
+    return tempd
 
 def calcMassFlux(elev,rusle,ls,water):
     
+    tempd = tempfile.TemporaryFile()
+    tempd = tempd.name+'.tif'
 
-    
+    processing.run("wbt:DInfMassFlux",
+                   {'dem':elev,
+                    'loading':rusle,
+                    'efficiency':ls,
+                    'absorption':water,
+                    'output':tempd})
+    return tempd
+
+    """
     mf = processing.run("saga:flowaccumulationrecursive", 
                    {'ELEVATION':elev,
                     'SINKROUTE':None,
@@ -46,7 +64,7 @@ def calcMassFlux(elev,rusle,ls,water):
                     'NO_NEGATIVES':False})
     
     return mf['ACCU_TOTAL']
-
+    """
 
 def getMassSum(mf,waterborder):
     mf_array = raster2Array(mf,1)
@@ -57,13 +75,6 @@ def getMassSum(mf,waterborder):
     
     return massSum
 
-def array2raster(in_array,map_raster):
-    tempd = tempfile.TemporaryFile()
-    tempd = tempd.name+'.tif'
-    
-    gdal_array.SaveArray(in_array.astype("float32"),tempd,"GTiff",map_raster)
-
-    return tempd
 
 def getEffect(mf,mfmin,mfmax):
     ret_max = mfmax - mfmin
@@ -72,45 +83,6 @@ def getEffect(mf,mfmin,mfmax):
     cost = round((reserved_material / ret_max) * 100,1)
     
     return ret_max,added_material,reserved_material,cost
-
-def raster2vector(in_rast,data):
-    
-    vectn = processing.run("gdal:polygonize", 
-        {'INPUT':in_rast,
-        'BAND':1,
-        'FIELD':'DN',
-        'EIGHT_CONNECTEDNESS':False,
-        'EXTRA':'',
-        'OUTPUT':"TEMPORARY_OUTPUT"})
-    
-    vect = QgsVectorLayer(vectn['OUTPUT'],"vyohyke","ogr")
-    arealist = [feat.geometry().area() for feat in vect.getFeatures() if feat['DN']==1]
-    namelist = list(data.columns)
-    for i in namelist:
-        vect.dataProvider().addAttributes([QgsField(i,QVariant.Double)])
-        vect.updateFields()
-    
-    with edit(vect):
-        for feat in vect.getFeatures():
-            if feat['DN'] == 0:
-                vect.deleteFeature(feat.id())
-
-            #if max(arealist) - feat.geometry().area() > 100:
-             #   vect.deleteFeature(feat.id())
-
-            for i in namelist:
-                datac = data[[i]]
-                #print (datac.iloc[0,0])
-                feat[i] = float(datac.iloc[0,0])
-            
-            geom = feat.geometry()
-            buffer = geom.buffer(10, 5)
-            buffer = buffer.buffer(-10,5)
-            feat.setGeometry(buffer)
-
-            vect.updateFeature(feat)
-    
-    return vect
 
 def getBufferzone(rasters,clipraster,waterborder,dist,target):
     
@@ -129,7 +101,7 @@ def getBufferzone(rasters,clipraster,waterborder,dist,target):
     zzone = np.where(cuttarr==1,zraster,0)
     z = zzone[zzone>0]
     
-    lsarr = np.where(lsarr>0,lsarr / 200.0,0) #ls facto only to cliparea
+    lsarr = np.where(lsarr>0,lsarr / 100.0,0) #ls facto only to cliparea
     
     
     ls_max = np.where(cuttarr==1,1,lsarr)
@@ -140,41 +112,42 @@ def getBufferzone(rasters,clipraster,waterborder,dist,target):
     
     mfmin = calcMassFlux(demfill,rus,ls_min,rasters[3])
     mfmax = calcMassFlux(demfill,rus,ls_max,rasters[3])
-    mfmin = getMassSum(mfmin,waterborder)
-    mfmax = getMassSum(mfmax,waterborder)
-    
+    mfmin = round(getMassSum(mfmin,waterborder)/1000,2)
+    mfmax = round(getMassSum(mfmax,waterborder)/1000,2)
     t=0
     for i in range(5,100,5):
         zp = np.percentile(z,i)
         ls_fact = np.where((cuttarr==1) & (zraster>zp) & (eucarr>=dist[0]),1,lsarr)
-        ls_fact = np.where((cuttarr==1) & (ls_fact<1) & (eucarr>=dist[2]),1,ls_fact)
+        #ls_fact = np.where((cuttarr==1) & (ls_fact<1) & (eucarr>=dist[2]),1,ls_fact)
     
         mdist = np.where((cuttarr==1) & (ls_fact<1),eucarr,0)
         mdist = mdist[mdist>0]
-        mdist = np.mean(mdist)*2
+        mdist = round(np.mean(mdist)*2,1)
         
         ls = array2raster(ls_fact,rasters[4])
         #print (mdist)
         #showRaster(ls)
         
         mf = calcMassFlux(demfill,rus,ls,rasters[3])
-        mf = getMassSum(mf,waterborder)
+        mf = round(getMassSum(mf,waterborder) / 1000,2)
         
         effect = getEffect(mf,mfmin,mfmax)
-        if (mdist > dist[1]):
+        if (mdist >= dist[1] and target[0] == False):
+            break
+        elif (target[0]==True and mdist>=dist[1] and effect[3]>=target[1]):
             break
         
     bzone = np.where((cuttarr==1) & (ls_fact<1),1,0)
     bzone = array2raster(bzone,rasters[1])
     
-    dataset = {'massflux_max':[mfmax],
-                'retention_max':[effect[0]],
-                'natural_massflux':[mfmin],
-                'massflux':[mf],
-                'material_reserved':[effect[2]],
-                'material_added':[effect[1]],
-                'distance_mean':[mdist],
-                'cost':[effect[3]]}
+    dataset = {'kiintoainekuorma_max':[mfmax],
+                'pidatyksen_max':[effect[0]],
+                'luonnonhuuhtouma':[mfmin],
+                'kiintoainekuorma':[mf],
+                'pidatettykiintoaine':[effect[2]],
+                'lisattykiintoaine':[effect[1]],
+                'keskileveys':[mdist],
+                'pidatysprosentti':[effect[3]]}
     
     df = pd.DataFrame(dataset)
     res = raster2vector(bzone,df)

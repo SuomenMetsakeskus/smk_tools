@@ -37,8 +37,10 @@ from qgis.core import (QgsProcessing,
                        QgsFeatureSink,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterNumber,
+                       QgsProcessingParameterBoolean,
                        QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink)
+                       QgsProcessingParameterFeatureSink,
+                       QgsProcessingParameterDefinition)
 #from get feature2layer
 from getInput import getWater,feature2layer
 from bufferZone import getBufferzone
@@ -76,6 +78,7 @@ class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
     MAXDIST = 'MAXDIST'
     AREA = 'AREA'
     COST = 'COST'
+    COSTB = 'COSTB'
     INPUT = 'INPUT'
 
     interface_name = ['suojakaista_taustarasterit','RUSLE','MassataseGISSUS','WB_Finland','DEM'] #taustarastereissa band1 = costdistance ; band2 = euclidean ; band3 = lsn
@@ -96,15 +99,9 @@ class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
                 [QgsProcessing.TypeVectorPolygon]
             )
         )
+        
+        
 
-        self.addParameter(
-            QgsProcessingParameterNumber(
-                self.COST,
-                self.tr('Pidätyksen vaikutusprosentti (%)'),
-                type=QgsProcessingParameterNumber.Integer,
-                minValue=40,maxValue=95,defaultValue=70
-            )
-            )
         """
         self.addParameter(
             QgsProcessingParameterNumber(
@@ -118,9 +115,9 @@ class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterNumber(
                 self.MEANDIST,
-                self.tr('Suojakaistan keskileveyden minimi (m)'),
+                self.tr('Suojakaistan keskileveys'),
                 type=QgsProcessingParameterNumber.Integer,
-                minValue=5,maxValue=50,defaultValue=10
+                minValue=5,maxValue=50,defaultValue=15
             )
             )
 
@@ -129,9 +126,10 @@ class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
                 self.MINDIST,
                 self.tr('Suojakaistan minimileveys (m)'),
                 type=QgsProcessingParameterNumber.Integer,
-                minValue=5,maxValue=20,defaultValue=7
+                minValue=5,maxValue=20,defaultValue=5
             )
             )
+        """
         self.addParameter(
             QgsProcessingParameterNumber(
                 self.MAXDIST,
@@ -140,7 +138,25 @@ class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
                 minValue=10,maxValue=100,defaultValue=60
             )
             )
-        
+        """
+        params = []
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                self.COSTB,
+                self.tr('Pidätyksen vaikutusprosentti on ehtona'),defaultValue=False
+            )
+        )
+        #if self.COSTB == 'False':
+        params.append(
+            QgsProcessingParameterNumber(
+                self.COST,
+                self.tr('Pidätyksen vaikutusprosentti (%)'),
+                minValue=60,maxValue=98,defaultValue=90,
+            )
+        )
+        for p in params:
+            p.setFlags(p.flags() | QgsProcessingParameterDefinition.FlagAdvanced) 
+            self.addParameter(p)
 
         self.addParameter(
             QgsProcessingParameterFeatureSink(
@@ -161,7 +177,7 @@ class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
         if source.featureCount() > 20:
             feedback.reportError("Input layer has too many features. 20 dissolved features is maximum. Process failed.")
             sys.exit()
-        
+
         #feedback.pushInfo(str(parameters['INPUT']))
         source = processing.run("native:dissolve", {'INPUT':parameters['INPUT'],'FIELD':[],'OUTPUT':'TEMPORARY_OUTPUT'})
         source = source['OUTPUT']
@@ -172,11 +188,13 @@ class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
         total = 100.0 / source.featureCount() if source.featureCount() else 0
         
         features = source.getFeatures()
+        costb = self.parameterAsBoolean(parameters,self.COSTB,context)
         cost = self.parameterAsInt(parameters,self.COST,context)
+        cost = (costb,cost)
         mindist = self.parameterAsInt(parameters,self.MINDIST,context)
         meandist = self.parameterAsInt(parameters,self.MEANDIST,context)
-        maxdist = self.parameterAsInt(parameters,self.MAXDIST,context)
-        dist = (mindist,meandist,maxdist)
+        #maxdist = self.parameterAsInt(parameters,self.MAXDIST,context)
+        dist = (mindist,meandist)
         
         for current, feature in enumerate(features):
             # Stop the algorithm if cancel button has been clicked
@@ -191,6 +209,7 @@ class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
                 rasterit.append(rast)
                 #exit
 
+            feedback.pushInfo(str(rasterit))
             waterline = getWaterline(rasterit,f)
             
             out = getBufferzone(rasterit,waterline[1],waterline[0],dist,cost)
