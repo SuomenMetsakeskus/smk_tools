@@ -13,6 +13,7 @@ import processing
 def fillSink(elev):
     tempd = tempfile.TemporaryFile()
     tempd = tempd.name+'.tif'
+    """
     processing.run("wbt:FillDepressions", 
                    {'dem':elev,
                     'fix_flats':True,
@@ -27,14 +28,14 @@ def fillSink(elev):
                     'FDIR':'TEMPORARY_OUTPUT',
                     'WSHED':'TEMPORARY_OUTPUT',
                     'MINSLOPE':0.1})
-    """
+    
     return tempd
 
 def calcMassFlux(elev,rusle,ls,water):
     
     tempd = tempfile.TemporaryFile()
     tempd = tempd.name+'.tif'
-
+    """
     processing.run("wbt:DInfMassFlux",
                    {'dem':elev,
                     'loading':rusle,
@@ -53,7 +54,7 @@ def calcMassFlux(elev,rusle,ls,water):
                     'VAL_MEAN':'TEMPORARY_OUTPUT',
                     'ACCU_MATERIAL':rusle,
                     'ACCU_TARGET':water,
-                    'ACCU_TOTAL':'TEMPORARY_OUTPUT',
+                    'ACCU_TOTAL':tempd,
                     'ACCU_LEFT':'TEMPORARY_OUTPUT',
                     'ACCU_RIGHT':'TEMPORARY_OUTPUT',
                     'FLOW_UNIT':1,
@@ -63,8 +64,8 @@ def calcMassFlux(elev,rusle,ls,water):
                     'METHOD':2,'CONVERGENCE':1.1,
                     'NO_NEGATIVES':False})
     
-    return mf['ACCU_TOTAL']
-    """
+    return tempd
+    
 
 def getMassSum(mf,waterborder):
     mf_array = raster2Array(mf,1)
@@ -93,27 +94,29 @@ def getBufferzone(rasters,clipraster,waterborder,dist,target):
     cuttarr = raster2Array(clipraster,1)
     lsarr = raster2Array(rasters[0],3)
     
-    rusarr = raster2Array(rasters[1],1)
-    rusarr = np.where(rusarr>0,rusarr/10000*4,0.01)
-    rus = array2raster(rusarr,rasters[4])
+    
     
     #change necessary value units and filter to clip raster
     zzone = np.where(cuttarr==1,zraster,0)
     z = zzone[zzone>0]
     
-    lsarr = np.where(lsarr>0,lsarr / 100.0,0) #ls facto only to cliparea
+    lsarr = np.where(lsarr>0,lsarr / 300.0,0) #ls facto only to cliparea
     
     
     ls_max = np.where(cuttarr==1,1,lsarr)
     ls_min = lsarr #min and max scenarios
-    
+
+    rusarr = raster2Array(rasters[1],1)
+    rusarr = np.where(rusarr>0,rusarr/10000*4,0.01) 
+    rus = array2raster(rusarr,rasters[4])
+
     ls_max = array2raster(ls_max,rasters[4])
     ls_min = array2raster(ls_min,rasters[4])
     
     mfmin = calcMassFlux(demfill,rus,ls_min,rasters[3])
     mfmax = calcMassFlux(demfill,rus,ls_max,rasters[3])
-    mfmin = round(getMassSum(mfmin,waterborder)/1000,2)
-    mfmax = round(getMassSum(mfmax,waterborder)/1000,2)
+    mfmin = round(getMassSum(mfmin,waterborder),2)
+    mfmax = round(getMassSum(mfmax,waterborder),2)
     t=0
     for i in range(5,100,5):
         zp = np.percentile(z,i)
@@ -123,31 +126,32 @@ def getBufferzone(rasters,clipraster,waterborder,dist,target):
         mdist = np.where((cuttarr==1) & (ls_fact<1),eucarr,0)
         mdist = mdist[mdist>0]
         mdist = round(np.mean(mdist)*2,1)
-        
+        #rus = np.where(rusarr>0,rusarr/10000*4*ls_fact,0.01)
+        #rus = array2raster(rus,rasters[4])
         ls = array2raster(ls_fact,rasters[4])
         #print (mdist)
         #showRaster(ls)
         
-        mf = calcMassFlux(demfill,rus,ls,rasters[3])
-        mf = round(getMassSum(mf,waterborder) / 1000,2)
+        #mf = calcMassFlux(demfill,rus,ls,rasters[3])
+        #mf = round(getMassSum(mf,waterborder),2)
         
-        effect = getEffect(mf,mfmin,mfmax)
+        #effect = getEffect(mf,mfmin,mfmax)
         if (mdist >= dist[1] and target[0] == False):
             break
-        elif (target[0]==True and mdist>=dist[1] and effect[3]>=target[1]):
-            break
-        
+        #elif (target[0]==True and mdist>=dist[1] and effect[3]>=target[1]):
+         #   break
+
     bzone = np.where((cuttarr==1) & (ls_fact<1),1,0)
     bzone = array2raster(bzone,rasters[1])
     
     dataset = {'kiintoainekuorma_max':[mfmax],
-                'pidatyksen_max':[effect[0]],
+                'pidatyksen_max':[mfmax-mfmin],
                 'luonnonhuuhtouma':[mfmin],
-                'kiintoainekuorma':[mf],
-                'pidatettykiintoaine':[effect[2]],
-                'lisattykiintoaine':[effect[1]],
-                'keskileveys':[mdist],
-                'pidatysprosentti':[effect[3]]}
+                #'kiintoainekuorma':[mf],
+                #'pidatettykiintoaine':[effect[2]],
+                #'lisattykiintoaine':[effect[1]],
+                #'pidatysprosentti':[effect[1]],
+                'keskileveys':[mdist]}
     
     df = pd.DataFrame(dataset)
     res = raster2vector(bzone,df)
