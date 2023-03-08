@@ -10,15 +10,15 @@ from getInput import getBboxWmsFormat
 import processing
 from fcFunctions import array2raster,raster2vector,clipRaster,raster2Array,cleanGeom
 
-def calcFocal(in_array,etai):
-
+def calcFocal(in_array,dist):
+    """calculates focal statistic retangle maximum from raster array """
     dat =pd.DataFrame(in_array)
     vert = dat
     ijlist = []
-    for i in range(0-etai,etai):
-        for j in range(0-etai,etai):
+    for i in range(0-dist,dist):
+        for j in range(0-dist,dist):
             e = sqrt(pow(i,2)+pow(j,2))
-            if e <=etai:
+            if e <=dist:
                 ijlist.append((i,j))
     
     for i in ijlist:
@@ -29,10 +29,11 @@ def calcFocal(in_array,etai):
     t.append(vert)
     t = np.array(t)
 
+    """return focal array of input raster array"""
     return t
 
 def processRaster(input):
-    
+    """calculates areas of where max(raster) - raster == 2"""
     rastOut = input[0:-4]+"hh.tif"
     rast = gdal.Open(input)
     
@@ -48,6 +49,8 @@ def processRaster(input):
 
 
 def snap2water(waterraster,area):
+    """snap the input vector to water raster"""
+
     waterarr = raster2Array(waterraster,1)
     waterarr = np.where(waterarr>1,1,0)
 
@@ -68,7 +71,7 @@ def snap2water(waterraster,area):
     return snapped['OUTPUT']
 
 def rasterizeVector(in_layer,gdal_extent,cells):
-    
+    """transform vector to raster"""
     output = os.path.dirname(os.path.realpath(in_layer.sourceName()))
     output = os.path.join(output,"rasterized.tif")
 
@@ -94,12 +97,14 @@ def rasterizeVector(in_layer,gdal_extent,cells):
 
 
 def getWaterline(rasters,leimikko):
+    """give waterline raster of input area if the area is within 10 meter to waterbody"""
+
     bbox = getBboxWmsFormat(leimikko)
     ss = bbox[0].split(',')
     extent = str(round(int(ss[0])-100,-1))+","+str(round(int(ss[2])+100,-1))+","+str(round(int(ss[1])-100,-1))+","+str(round(int(ss[3])+100,-1))+" ["+str(bbox[1])+"]"
     
-    leimikko = snap2water(rasters[3],leimikko)
-    vraster = processRaster(rasters[3]) #vesistörajan määritys
+    leimikko = snap2water(rasters[2],leimikko)
+    vraster = processRaster(rasters[2]) #vesistörajan määritys
 
     leimraster = rasterizeVector(leimikko,extent,2)
     vrast_clip = clipRaster(vraster,1,leimraster,1) # rajataan leimikkoon

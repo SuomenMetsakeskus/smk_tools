@@ -454,7 +454,7 @@ def calculateNPretention(in_feat):
     ret = NP_retention()
     with edit(in_feat):
         for feat in in_feat.getFeatures():
-            if feat['euc_1'] is not None or feat['euc_1'] != 0:
+            if feat['euc_1'] is not None:
                 feat['pRetent'] = ret['P']/feat['euc_1']
                 
             in_feat.updateFeature(feat)

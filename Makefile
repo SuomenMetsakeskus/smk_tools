@@ -40,7 +40,7 @@ SOURCES = \
 	__init__.py \
 	smk_tools.py 
 
-PLUGINNAME = smk_tools
+PLUGINNAME = smk-geoprosessointi
 
 PY_FILES = \
 	__init__.py \

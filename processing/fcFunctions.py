@@ -10,8 +10,7 @@ import processing
 
 
 def raster2vector(in_rast,data):
-    
-    print (in_rast)
+    """transfrom input buffer zone raster to vector"""
     vectn = processing.run("gdal:polygonize", 
         {'INPUT':in_rast,
         'BAND':1,
@@ -29,10 +28,12 @@ def raster2vector(in_rast,data):
     
     with edit(vect):
         for feat in vect.getFeatures():
+            #raster value 0 means out
             if feat['DN'] == 0:
                 vect.deleteFeature(feat.id())
-
-            if feat.geometry().area() < 500:
+            
+            #delete small parts
+            if max(arealist) - feat.geometry().area() > max(arealist) /2:
                 vect.deleteFeature(feat.id())
 
             for i in namelist:
@@ -50,7 +51,7 @@ def raster2vector(in_rast,data):
     return vect
 
 def cleanGeom(vector):
-    
+    """cleans input vector geometry by buffering algorithm"""
     #vector = QgsVectorLayer(vector,"vect","ogr")
 
     with edit(vector):
@@ -63,7 +64,7 @@ def cleanGeom(vector):
             vector.updateFeature(feat)
 
 def clipRaster(in_raster,band,clip_raster,band_clip):
-    
+    """clip raster by other raster"""
     output = os.path.dirname(os.path.realpath(in_raster))
     output = os.path.join(output,"clipped.tif")
     

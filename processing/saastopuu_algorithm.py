@@ -275,8 +275,8 @@ class saastopuu_toolsAlgorithm(QgsProcessingAlgorithm):
             weights ={"NP":float(fosf),"BIO":float(biod),"LP":float(lahop),"DTW":float(dtw)}
             puuMaara = self.parameterAsInt(parameters,self.PUUM,context)
             
-            calculateEnvValue(outChm['OUTPUT'],weights)
-            outChm = hsAnalysis(outChm['OUTPUT'],'env_value')
+            calculateEnvValue(outChm,weights)
+            outChm = hsAnalysis(outChm,'env_value')
 
             feedback.setProgressText("koko: "+str(round(leimArea[0],2))+"\ns-puiden määrä: "+str(int(puuMaara*leimArea[0])))
             
