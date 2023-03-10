@@ -41,6 +41,7 @@ pluginPath = os.path.dirname(__file__)
 #from .processing.focalstatistic_calculate import focal_toolsAlgorithm
 from .processing.saastopuu_algorithm import saastopuu_toolsAlgorithm
 from .processing.suojakaista_algorithm import suojakaista_toolsAlgorithm
+from .processing.suojakaista_algorithm_wbt import suojakaista_toolsAlgorithm_wbt
 
 
 
@@ -73,6 +74,7 @@ class smk_toolsProvider(QgsProcessingProvider):
         Loads all algorithms belonging to this provider.
         """
         self.addAlgorithm(suojakaista_toolsAlgorithm())
+        self.addAlgorithm(suojakaista_toolsAlgorithm_wbt())
         self.addAlgorithm(saastopuu_toolsAlgorithm())
         #self.addAlgorithm(focal_toolsAlgorithm())
         

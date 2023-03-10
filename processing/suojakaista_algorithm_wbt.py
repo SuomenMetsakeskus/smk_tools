@@ -44,7 +44,7 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterDefinition)
 #from get feature2layer
 from getInput import getWater,feature2layer
-from bufferZone import getBufferzone
+from bufferZone_wbt import getBufferzone
 from waterLine import getWaterline
 #from PIL import Image
 import processing
@@ -55,7 +55,7 @@ pluginPath = os.path.abspath(
         os.path.dirname(__file__),
         os.pardir))
 
-class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
+class suojakaista_toolsAlgorithm_wbt(QgsProcessingAlgorithm):
     """
     This is an algorithm that takes a vector layer and
     get background rasters via interface the vector area
@@ -72,8 +72,8 @@ class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
     MINDIST = 'MINDIST'
     MEANDIST = 'MEANDIST'
     AREA = 'AREA'
-    #COST = 'COST' not use the cost parameters before correct mass flux formula 
-    #COSTB = 'COSTB'
+    COST = 'COST'
+    COSTB = 'COSTB'
     INPUT = 'INPUT'
 
     interface_name = ['suojakaista_taustarasterit','RUSLE','WB_Finland','DEM']
@@ -112,7 +112,7 @@ class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
             )
             )
        
-        """
+       
         params = []
         self.addParameter(
             QgsProcessingParameterBoolean(
@@ -131,7 +131,7 @@ class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
         for p in params:
             p.setFlags(p.flags() | QgsProcessingParameterDefinition.FlagAdvanced) 
             self.addParameter(p)
-        """
+      
 
         self.addParameter(
             QgsProcessingParameterFeatureSink(
@@ -158,10 +158,10 @@ class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
         count = source.featureCount() if source.featureCount() else 0
 
         features = source.getFeatures()
-        #costb = self.parameterAsBoolean(parameters,self.COSTB,context)
-        #cost = self.parameterAsInt(parameters,self.COST,context)
-        #cost = (costb,cost)
-        cost = (False,80) #change to above when massflux formula is correct
+        costb = self.parameterAsBoolean(parameters,self.COSTB,context)
+        cost = self.parameterAsInt(parameters,self.COST,context)
+        cost = (costb,cost)
+        #cost = (False,80) #change to above when massflux formula is correct
         mindist = self.parameterAsInt(parameters,self.MINDIST,context)
         meandist = self.parameterAsInt(parameters,self.MEANDIST,context)
         dist = (mindist,meandist)
@@ -203,7 +203,7 @@ class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
 
         # Return the results of the algorithm
         #style for layer
-        style = os.path.join(os.path.dirname(__file__),"suojakaista_style1.qml")
+        style = os.path.join(os.path.dirname(__file__),"suojakaista_style2.qml")
         layer = QgsProcessingUtils.mapLayerFromString(dest_id,context)
         layer.loadNamedStyle(style)
 
@@ -217,7 +217,7 @@ class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Luo suojakaistaehdotus'
+        return 'Luo suojakaistaehdotus (Whiteboxtools)'
     def icon(self):
 
         return QIcon(os.path.join(pluginPath, 'icon.jpg'))
@@ -250,4 +250,4 @@ class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
         return QCoreApplication.translate('Processing', string)
 
     def createInstance(self):
-        return suojakaista_toolsAlgorithm()
+        return suojakaista_toolsAlgorithm_wbt()
