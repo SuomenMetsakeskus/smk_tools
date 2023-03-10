@@ -8,7 +8,7 @@
 
 [general]
 name=smk luontotyökalut
-qgisMinimumVersion=3.22
+qgisMinimumVersion=3.2
 description=Find the retention tree groups and riparian buffer zone area with given polygon
 version=0.3.5
 author=Suomen metsäkeskus

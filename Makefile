@@ -40,7 +40,7 @@ SOURCES = \
 	__init__.py \
 	smk_tools.py 
 
-PLUGINNAME = smk-geoprosessointi
+PLUGINNAME = smk luontotyökalut
 
 PY_FILES = \
 	__init__.py \
@@ -65,7 +65,8 @@ PEP8EXCLUDE=pydev,resources.py,conf.py,third_party,ui
 #	* Windows:
 #	  AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins'
 
-QGISDIR=C:\Users\mkesala\AppData/Roaming/QGIS/QGIS3/profiles/default/python/plugins
+QGISDIR = AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins
+#QGISDIR=C:\Users\mkesala\AppData/Roaming/QGIS/QGIS3/profiles/default/python/plugins
 
 #################################################
 # Normally you would not need to edit below here
