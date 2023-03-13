@@ -2,6 +2,8 @@ import requests,tempfile
 from math import sqrt,pow
 from qgis.PyQt.QtCore import QVariant
 from qgis.core import QgsVectorLayer,QgsField,QgsFeature
+from osgeo import gdal
+import numpy as np
 
 
 def getBboxWmsFormat(in_feat:QgsVectorLayer):
@@ -36,13 +38,36 @@ def getWater(input_polygon:QgsVectorLayer,taso):
                 "interpolation":"+RSP_BilinearInterpolation",
                 "f":"image"}
 
-    test = requests.get(wmsurl,params,allow_redirects=True)
-    respo = test.content
-    f = open(tempd,"wb")
-    f.write(respo)
-    f.close()
+    try:
+        respo= requests.get(wmsurl,params,allow_redirects=True)
+        
+        if respo.status_code != 200:
+           info = "Cannot connect to "+str(taso)+ " data: "+str(wmsurl)
+           infolevel = 3
+        else:
+            open(tempd,'wb').write(respo.content)
     
-    return tempd
+    except:
+        info = "Cannot connect to "+str(taso)+ " data: "+str(wmsurl)
+        infolevel = 3
+    
+        
+    try:
+        test = gdal.Open(tempd)
+        test_b = test.GetRasterBand(1)
+        test_a = test_b.ReadAsArray()
+        if np.max(test_a) > 1:
+            info = str(taso)+" data is ok!"
+            infolevel = 1
+            del test,test_b,test_a
+        else:
+           info = "Not able find "+str(taso)+" data from area: "+str(bbox[0])
+           infolevel = 3
+    except:
+        info = "Not able find "+str(taso)+" data from area: "+str(bbox[0])
+        infolevel = 3
+
+    return tempd,info,infolevel
 
 def feature2layer(feature):
     vl = QgsVectorLayer("Polygon", "temporary_pol","memory")

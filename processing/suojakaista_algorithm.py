@@ -142,6 +142,9 @@ class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
         
+        feedb = {1:feedback.pushInfo,
+                2:feedback.pushWarning,
+                3:feedback.reportError}
 
         source = self.parameterAsSource(parameters, self.INPUT, context)
         if source.featureCount() > 20:
@@ -178,8 +181,11 @@ class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
                 #print (i)
                 f = feature2layer(feature)
                 rast = getWater(f,i)
+                feedb[rast[2]](rast[1])
+                if rast[2]==3:
+                    sys.exit("Keskeytetään prosessi. Ota yhteyttä palvelun kehittäjään.")
                 #rast = gdal.Open(rast)
-                rasterit.append(rast)
+                rasterit.append(rast[0])
                 #exit
 
             feedback.pushInfo("Tausta-aineisto haettu rajapinnasta")
