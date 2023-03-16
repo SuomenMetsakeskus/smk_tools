@@ -110,7 +110,7 @@ def getBufferzone(rasters,clipraster,waterborder,dist,target):
     rusarr = raster2Array(rasters[1],1)
     rusarr = np.where(rusarr>0,rusarr/10000*4,0.01) 
     rus = array2raster(rusarr,rasters[3])
-
+    """
     ls_max = array2raster(ls_max,rasters[3])
     ls_min = array2raster(ls_min,rasters[3])
     
@@ -118,7 +118,8 @@ def getBufferzone(rasters,clipraster,waterborder,dist,target):
     mfmax = calcMassFlux(demfill,rus,ls_max,rasters[2])
     mfmin = round(getMassSum(mfmin,waterborder),2)
     mfmax = round(getMassSum(mfmax,waterborder),2)
-    t=0
+    """
+    #t=0
     #don't remove comments below. Future version will use those parts.
     for i in range(5,100,5):
         zp = np.percentile(z,i)
@@ -139,6 +140,19 @@ def getBufferzone(rasters,clipraster,waterborder,dist,target):
         
         #effect = getEffect(mf,mfmin,mfmax)
         if (mdist >= dist[1] and target[0] == False):
+            for j in range(i-4,i+1,1):
+                zp = np.percentile(z,j)
+                ls_fact = np.where((cuttarr==1) & (zraster>zp) & (eucarr>=dist[0]),1,lsarr)
+                #ls_fact = np.where((cuttarr==1) & (ls_fact<1) & (eucarr>=dist[2]),1,ls_fact)
+    
+                mdist = np.where((cuttarr==1) & (ls_fact<1),eucarr,0)
+                mdist = mdist[mdist>0]
+                mdist = round(np.mean(mdist)*2,1)
+                #rus = np.where(rusarr>0,rusarr/10000*4*ls_fact,0.01)
+                #rus = array2raster(rus,rasters[4])
+                ls = array2raster(ls_fact,rasters[3])
+                if (mdist >= dist[1] and target[0] == False):
+                    break
             break
         #elif (target[0]==True and mdist>=dist[1] and effect[3]>=target[1]):
          #   break
@@ -146,9 +160,9 @@ def getBufferzone(rasters,clipraster,waterborder,dist,target):
     bzone = np.where((cuttarr==1) & (ls_fact<1),1,0)
     bzone = array2raster(bzone,rasters[1])
     
-    dataset = {'kiintoainekuorma_max':[mfmax],
-                'pidatyksen_max':[mfmax-mfmin],
-                'luonnonhuuhtouma':[mfmin],
+    dataset = {#'kiintoainekuorma_max':[mfmax],
+                #'pidatyksen_max':[mfmax-mfmin],
+                #'luonnonhuuhtouma':[mfmin],
                 #'kiintoainekuorma':[mf],
                 #'pidatettykiintoaine':[effect[2]],
                 #'lisattykiintoaine':[effect[1]],

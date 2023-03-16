@@ -203,18 +203,15 @@ def processRaster(input):
     
     chmB = chm.GetRasterBand(1)
     chmA = chmB.ReadAsArray()
-    chmA = (chmA-126)*0.232
+    chmA = (chmA-126)*0.232 #vaihe 1
 
-    focal = calcFocal(chmA,3)
+    focal = calcFocal(chmA,3) #vaihe 2
     huip = focal - chmA
     huip = np.where(focal-chmA==0,chmA,np.NaN)
-    huip = np.where(huip>=5,huip*10,np.NaN)
+    huip = np.where(huip>=5,huip*10,np.NaN) #vaihe3
     gdal_array.SaveArray(huip.astype("float32"),rastOut,"GTiff",chm)
 
     return rastOut
-    #'OUTPUT':'TEMPORARY_OUTPUT'
-
-    #chm = getRaster(buffer_area)
 
 def calcFocal(in_array,etai):
 

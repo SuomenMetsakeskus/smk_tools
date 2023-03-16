@@ -33,7 +33,7 @@ def raster2vector(in_rast,data):
                 vect.deleteFeature(feat.id())
             
             #delete small parts
-            if max(arealist) - feat.geometry().area() > max(arealist) /2:
+            if max(arealist) - feat.geometry().area() > max(arealist) /1.4:
                 vect.deleteFeature(feat.id())
 
             for i in namelist:
