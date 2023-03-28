@@ -119,7 +119,7 @@ def getBufferzone(rasters,clipraster,waterborder,dist,target):
     mfmax = round(getMassSum(mfmax,waterborder),2)
     
     #don't remove comments below. Future version will use those parts.
-    for i in range(3,100,3):
+    for i in range(0,100,5):
         zp = np.percentile(z,i)
         ls_fact = np.where((cuttarr==1) & (zraster>zp) & (eucarr>=dist[0]),1,lsarr)
         #ls_fact = np.where((cuttarr==1) & (ls_fact<1) & (eucarr>=dist[2]),1,ls_fact)
@@ -138,8 +138,42 @@ def getBufferzone(rasters,clipraster,waterborder,dist,target):
         
         effect = getEffect(mf,mfmin,mfmax)
         if (mdist >= dist[1] and target[0] == False):
+            for j in range(i-4,i+1,1):
+                zp = np.percentile(z,j)
+                ls_fact = np.where((cuttarr==1) & (zraster>zp) & (eucarr>=dist[0]),1,lsarr)
+                #ls_fact = np.where((cuttarr==1) & (ls_fact<1) & (eucarr>=dist[2]),1,ls_fact)
+    
+                mdist = np.where((cuttarr==1) & (ls_fact<1),eucarr,0)
+                mdist = mdist[mdist>0]
+                mdist = round(np.mean(mdist)*2,1)
+                #rus = np.where(rusarr>0,rusarr/10000*4*ls_fact,0.01)
+                #rus = array2raster(rus,rasters[4])
+                ls = array2raster(ls_fact,rasters[3])
+                mf = calcMassFlux(demfill,rus,ls,rasters[2])
+                mf = round(getMassSum(mf,waterborder),2)
+                effect = getEffect(mf,mfmin,mfmax)
+                if (mdist >= dist[1] and target[0] == False):
+                    break
+            
             break
+            
         elif (target[0]==True and mdist>=dist[1] and effect[3]>=target[1]):
+            for j in range(i-4,i+1,1):
+                zp = np.percentile(z,j)
+                ls_fact = np.where((cuttarr==1) & (zraster>zp) & (eucarr>=dist[0]),1,lsarr)
+                #ls_fact = np.where((cuttarr==1) & (ls_fact<1) & (eucarr>=dist[2]),1,ls_fact)
+    
+                mdist = np.where((cuttarr==1) & (ls_fact<1),eucarr,0)
+                mdist = mdist[mdist>0]
+                mdist = round(np.mean(mdist)*2,1)
+                #rus = np.where(rusarr>0,rusarr/10000*4*ls_fact,0.01)
+                #rus = array2raster(rus,rasters[4])
+                ls = array2raster(ls_fact,rasters[3])
+                mf = calcMassFlux(demfill,rus,ls,rasters[2])
+                mf = round(getMassSum(mf,waterborder),2)
+                effect = getEffect(mf,mfmin,mfmax)
+                if (mdist >= dist[1] and target[0] == False):
+                    break
             break
 
     bzone = np.where((cuttarr==1) & (ls_fact<1),1,0)

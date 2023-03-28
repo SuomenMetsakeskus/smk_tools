@@ -1,26 +1,6 @@
-Plugin Builder Results
 
-Your plugin smk_tools was created in:
-    C:/GitRepo/Luontotieto/QGIS\smk_tools
+Luontotyökalut on tarkoitettu tukiaineistoksi metsätalouden toimenpiteiden suunnitteluun ja toteutukseen. Aineistot eivät poista maastosuunnittelun tarvetta, mutta niiden avulla on mahdollista suunnata suunnittelua vesiensuojelun ja monimuotoisuuden kannalta oleellisimmille kohteille.  
 
-Your QGIS plugin directory is located at:
-    C:/Users/mkesala/AppData/Roaming/QGIS/QGIS3/profiles/default/python/plugins
+Työkalua voi käyttää QGIS-paikkatietosovelluksella.   
 
-What's Next:
-
-  * Copy the entire directory containing your new plugin to the QGIS plugin
-    directory
-
-  * Run the tests (``make test``)
-
-  * Test the plugin by enabling it in the QGIS plugin manager
-
-  * Customize it by editing the implementation file: ``smk_tools.py``
-
-  * You can use the Makefile to compile your Ui and resource files when
-    you make changes. This requires GNU make (gmake)
-
-For more information, see the PyQGIS Developer Cookbook at:
-http://www.qgis.org/pyqgis-cookbook/index.html
-
-(C) 2011-2018 GeoApt LLC - geoapt.com
+Tehokkaimmin voit hyödyntää työkaluja, jos voit ottaa niitä käyttöön omassa suunnittelujärjestelmässä.

@@ -93,7 +93,7 @@ def getEffect(mf,mfmin,mfmax):
 def getBufferzone(rasters,clipraster,waterborder,dist,target):
     """Increase buffer zone area when distance and target are satisfied"""
     #change the rasters to numpy array
-    demfill = fillSink(rasters[3])
+    #demfill = fillSink(rasters[3])
     zraster = raster2Array(rasters[0],1)
     eucarr = raster2Array(rasters[0],2)
     cuttarr = raster2Array(clipraster,1)
@@ -110,6 +110,7 @@ def getBufferzone(rasters,clipraster,waterborder,dist,target):
     rusarr = raster2Array(rasters[1],1)
     rusarr = np.where(rusarr>0,rusarr/10000*4,0.01) 
     rus = array2raster(rusarr,rasters[3])
+
     """
     ls_max = array2raster(ls_max,rasters[3])
     ls_min = array2raster(ls_min,rasters[3])
