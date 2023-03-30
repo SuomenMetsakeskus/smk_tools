@@ -152,7 +152,7 @@ class suojakaista_toolsAlgorithm_wbt(QgsProcessingAlgorithm):
             sys.exit()
 
         feedback.pushInfo("Aloitetaan suojakaistan luonti")
-        source = processing.run("native:dissolve", {'INPUT':parameters['INPUT'],'FIELD':[],'OUTPUT':'TEMPORARY_OUTPUT'})
+        source = processing.run("native:dissolve", {'INPUT':parameters['INPUT'],'FIELD':[],'SEPARATE_DISJOINT':True,'OUTPUT':'TEMPORARY_OUTPUT'})
         source = source['OUTPUT']
 
         # Compute the number of steps to display within the progress bar and

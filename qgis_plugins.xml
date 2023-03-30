@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <plugins>
- <pyqgis_plugin name="smk luontotyökalut" version="1.0.0">
+ <pyqgis_plugin name="smk luontotyökalut" version="1.0.1">
      <description>Suomen metsäkeskuksen työkalut</description>
      <homepage>https://www.metsakeskus.fi/fi/avoin-metsa-ja-luontotieto/aineistot-paikkatieto-ohjelmille/tyokalut</homepage>
      <qgis_minimum_version>3.26</qgis_minimum_version>
