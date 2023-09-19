@@ -178,7 +178,7 @@ def getBufferzone(rasters,clipraster,waterborder,dist,target):
 
     bzone = np.where((cuttarr==1) & (ls_fact<1),1,0)
     bzone = array2raster(bzone,rasters[1])
-    
+
     dataset = {'kiintoainekuorma_max':[mfmax/1000],
                 'pidatyksen_max':[effect[0]],
                 'luonnonhuuhtouma':[mfmin/1000],

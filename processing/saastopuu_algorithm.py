@@ -34,6 +34,7 @@ from qgis import processing
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtCore import QCoreApplication,QVariant
 from qgis.core import (QgsProcessing,
+                       QgsField,
                        QgsFeatureSink,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterEnum,
@@ -45,6 +46,8 @@ from qgis.core import (QgsProcessing,
 import os,time,sys
 sys.path.append(os.path.dirname(__file__))
 from PIL import Image
+from getInput import getWebRasterLayer,getWebVectorLayer,getProtectedSites
+from smk_geotools import feature2Layer,createTreeMap,addFieldValue,joinIntersection
 from saastopuu import *
 pluginPath = os.path.abspath(
     os.path.join(
@@ -66,8 +69,21 @@ class saastopuu_toolsAlgorithm(QgsProcessingAlgorithm):
     PUUM = 'PUUM'
     INPUT = 'INPUT'
 
-    standfields = ['SPECIALFEATURECODE','SPECIALFEATUREADDITIONALCODE']
-    gfields = ['FERTILITYCLASS','DEVELOPMENTCLASS','STEMCOUNTPINE','STEMCOUNTDECIDUOUS','STEMCOUNTSPRUCE','MEANDIAMETERDECIDUOUS','MEANDIAMETERPINE','MEANDIAMETERSPRUCE','MEANHEIGHTDECIDUOUS','MEANHEIGHTPINE','MEANHEIGHTSPRUCE']
+    chm_data = 'https://rajapinnat.metsaan.fi/geoserver/Avoinmetsatieto/CHM_newest/ows?'
+    grid_data = 'https://avoin.metsakeskus.fi/rajapinnat/v1/gridcell/ows?'
+    stand_data = 'https://avoin.metsakeskus.fi/rajapinnat/v1/stand/ows?'
+    dtw_data = 'https://paituli.csc.fi/geoserver/paituli/wcs?'
+    mkasviv_data = 'https://paikkatieto.ymparisto.fi/arcgis/rest/services/INSPIRE/SYKE_EliomaantieteellisetAlueet/MapServer/0'
+    euc_data = 'https://aineistot.metsakeskus.fi/metsakeskus/rest/services/Vesiensuojelu/euclidean/ImageServer'
+
+    stand_name = 'stand'
+    gname = 'gridcell'
+    dtw_name = 'paituli:luke_dtw_04'
+    mkasviv_name = 'eliogeoalue'
+
+    stand_fields = 'SPECIALFEATURECODE,SPECIALFEATUREADDITIONALCODE,GEOMETRY'
+    grid_fields = 'GEOMETRY,FERTILITYCLASS,DEVELOPMENTCLASS,STEMCOUNTPINE,STEMCOUNTDECIDUOUS,STEMCOUNTSPRUCE,MEANDIAMETERDECIDUOUS,MEANDIAMETERPINE,MEANDIAMETERSPRUCE,MEANHEIGHTDECIDUOUS,MEANHEIGHTPINE,MEANHEIGHTSPRUCE'
+    mkasviv_fields = 'PaajakoNro,Nimi'
 
 
     def initAlgorithm(self, config):
@@ -152,7 +168,7 @@ class saastopuu_toolsAlgorithm(QgsProcessingAlgorithm):
         """
         Here is where the processing itself takes place.
         """
-        feedb = {1:feedback.pushInfo,
+        feedb = {1:feedback.setProgressText,
                 2:feedback.pushWarning,
                 3:feedback.reportError}
         # Retrieve the feature source and sink. The 'dest_id' variable is used
@@ -194,24 +210,26 @@ class saastopuu_toolsAlgorithm(QgsProcessingAlgorithm):
             out.setCrs(source.crs())
             out1.setCrs(source.crs())
 
-            chm = getRaster(out)
+            chm = getWebRasterLayer(out,self.chm_data,"")
             feedb[chm[2]](chm[1])
             
-            stand = getFeatureFromWfs(out,'stand')
+            stand = getWebVectorLayer(out,self.stand_data,self.stand_name,self.stand_fields)
             feedb[stand[2]](stand[1])
 
-            fgrid = getFeatureFromWfs(out,'gridcell')
+            fgrid = getWebVectorLayer(out,self.grid_data,self.gname,self.grid_fields)
             feedb[fgrid[2]](fgrid[1])
 
-            dtw = getDTW(out,"dtw")
+            dtw = getWebRasterLayer(out,self.dtw_data,self.dtw_name)
             feedb[dtw[2]](dtw[1])
 
-            biogeo = geom2esri(out)
-            euc = getDTW(out,"euc")
+            biogeo = getWebVectorLayer(out,self.mkasviv_data,self.mkasviv_name,self.mkasviv_fields)
+            feedb[biogeo[2]](biogeo[1])
+
+            euc = getWebRasterLayer(out,self.euc_data,"")
             feedb[euc[2]](euc[1])
             
             proSites = getProtectedSites(out)
-            leim = handleInput(out1)
+            leim = addFieldValue(out1,"leimikko",1)
             #joinList = [stand,fgrid,biogeo,proSites]
             #print (proSites)
             #if proSites is not None
@@ -221,12 +239,12 @@ class saastopuu_toolsAlgorithm(QgsProcessingAlgorithm):
             feedback.setProgressText("Aloitetaan puukartan luonti")
             feedback.setProgress(10)
             #print (chm)
-            chm =processRaster(chm[0])
+            #chm =processRaster(chm[0])
             feedback.setProgress(20)
             feedback.setProgressText("vektoroidaan puukartta")
             feedback.setProgress(30)
             
-            outChm = vectorCHM(chm)
+            outChm = createTreeMap(chm[0],3)
 
             feedback.setProgress(40)
 
@@ -234,11 +252,11 @@ class saastopuu_toolsAlgorithm(QgsProcessingAlgorithm):
             feedback.setProgress(50)
 
 
-            outChm = joinForestData(outChm,stand[0],self.standfields)
-            outChm = joinForestData(outChm,fgrid[0],self.gfields)
-            outChm = joinForestData(outChm,biogeo,[])
-            outChm = joinForestData(outChm,proSites,[])
-            outChm = joinForestData(outChm,leim,['leimikko'])
+            outChm = joinIntersection(outChm,stand[0],list(self.stand_fields.split(",")))
+            outChm = joinIntersection(outChm,fgrid[0],list(self.grid_fields.split(",")))
+            outChm = joinIntersection(outChm,biogeo[0],[])
+            outChm = joinIntersection(outChm,proSites,[])
+            outChm = joinIntersection(outChm,leim,['leimikko'])
 
             if dtw[2]==1:
                 outChm = processing.run("native:rastersampling", {'INPUT':outChm,'RASTERCOPY':dtw[0],'COLUMN_PREFIX':'DTW_','OUTPUT':'TEMPORARY_OUTPUT'})

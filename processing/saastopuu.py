@@ -4,7 +4,6 @@ from osgeo import gdal,gdal_array
 import pandas as pd
 import numpy as np
 from math import sqrt,pow
-import json
 from qgis.PyQt.QtCore import QVariant
 from paras_2 import decay_tree_potential,NP_retention
 import matplotlib.pyplot as plt
@@ -14,7 +13,7 @@ from qgis.core import (
     QgsFeature,
     QgsField,
     QgsVectorLayer,edit)
-import os,requests,tempfile
+import os,tempfile
 
 #testitaso ="S:/Luontotieto/QGIS_plugin_test/testitasot.gpkg|layername=inputLeimikko"
 #testitaso = "S:/Luontotieto/QGIS_plugin_test/testitasot.gpkg|layername=testitasov1"
@@ -63,262 +62,9 @@ def proBuffer(input):
 
     return out['OUTPUT']
 
-def getBboxWmsFormat(in_feat):
-    desc=in_feat.extent()
-    x_min=int(desc.xMinimum())
-    y_min=int(desc.yMinimum())
-    x_max=int(desc.xMaximum())+1
-    y_max=int(desc.yMaximum())+1
-    srid=str(in_feat.crs().authid())
-    exte = str(x_min)+","+str(y_min)+","+str(x_max)+","+str(y_max)
-    witdth = x_max - x_min
-    height = y_max - y_min
-    
-    return exte,srid,witdth,height
-
-#def dataValid(stand,fgrid,dtw,)
-
-def getRaster(in_feat):
-    bbox = getBboxWmsFormat(in_feat)
-    tempd = tempfile.TemporaryFile()
-    tempd = tempd.name+'.tif'
-
-    #print (tempd)
 
 
-    wmsurl = 'https://rajapinnat.metsaan.fi/geoserver/Avoinmetsatieto/CHM_newest/ows?'
-    params = {'service':'wms',
-          'request':'getMap',
-         'bbox':bbox[0],
-          'format':'image/geotiff',
-          'width':bbox[2],
-          'height':bbox[3],
-          'layers':'CHM_newest',
-          'srs':bbox[1]}
 
-    try:
-        respo = requests.get(wmsurl,params,allow_redirects=True)
-        if respo.status_code != 200:
-            info = "Cannot connect to chm data: "+str(wmsurl)
-            infolevel = 3
-        else:
-            open(tempd,'wb').write(respo.content)
-            info = "CHM file is ok"
-            infolevel = 1
-
-    except:
-        info = "Cannot connect to chm data: "+str(wmsurl)
-        infolevel = 3
-
-    
-
-    try:
-        test = gdal.Open(tempd)
-        test_b = test.GetRasterBand(1)
-        test_a = test_b.ReadAsArray()
-        if np.max(test_a) > 10:
-            info = "CHM file is ok"
-            infolevel = 1
-            del test,test_b,test_a
-        else:
-            info = "Cannot connect to chm data: "+str(wmsurl)
-            infolevel = 3
-    except:
-        info = "Cannot connect to chm data: "+str(wmsurl)
-        infolevel = 3
-    
-    #ras = arcpy.Raster(tempd)
-    return tempd,info,infolevel
-
-def getDTW(in_feat,service):
-    #QgsMessageLog.logMessage("Kokeillaan viestiä: "+str(in_feat),level=Qgis.Info)
-    bbox = getBboxWmsFormat(in_feat)
-    ss = bbox[0].split(',')
-
-    tempd = tempfile.TemporaryFile()
-    tempd = tempd.name+'.tif'
-    
-    if service == "dtw":
-        wmsurl = 'https://paituli.csc.fi/geoserver/paituli/wcs?'
-        covId = 'paituli:luke_dtw_04'
-        version = '2.0.0'
-        sset1 = 'E('+ss[0]+','+ss[2]+')'
-        sset2 = 'N('+ss[1]+','+ss[3]+')'
-        params = {'service':'WCS',
-            'request':'GetCoverage',
-            'version':version,
-            'coverageId':covId}
-        wmsurl = wmsurl+'subset='+sset1+'&subset='+sset2
-    
-    #tee oma moduuli tästä
-    else:
-        wmsurl = 'https://aineistot.metsakeskus.fi/metsakeskus/rest/services/Vesiensuojelu/euclidean/ImageServer/exportImage?'
-        params = {"bbox":ss[0]+","+ss[1]+","+ss[2]+","+ss[3],
-                "bboxSR":3067,
-                "imageSR":3067,
-                "format":'tiff',
-                "pixelType":"S16",
-                "noData":0,
-                "noDataInterpretation":"esriNoDataMatchAny",
-                "interpolation":"+RSP_BilinearInterpolation",
-                "f":"image"}
-    try:
-        respo= requests.get(wmsurl,params,allow_redirects=True)
-        
-        if respo.status_code != 200:
-           info = "Cannot connect to water data: "+str(wmsurl)
-           infolevel = 2
-        else:
-            open(tempd,'wb').write(respo.content)
-    
-    except:
-        info = "Cannot connect to water data: "+str(wmsurl)
-        infolevel = 2
-    
-        
-    try:
-        test = gdal.Open(tempd)
-        test_b = test.GetRasterBand(1)
-        test_a = test_b.ReadAsArray()
-        if np.max(test_a) > 1:
-            info = "Water data is ok!"
-            infolevel = 1
-            del test,test_b,test_a
-        else:
-           info = "Not able find water data from area: "+str(bbox[0])
-           infolevel = 2
-    except:
-        info = "Not able find water data from area: "+str(bbox[0])
-        infolevel = 2
-
-    return tempd,info,infolevel
-
-def copyRaster2(inp,outp):
-    os.popen('copy '+inp+' '+outp)
-
-def processRaster(input):
-    
-    rastOut = input[0:-4]+"hh.tif"
-    chm = gdal.Open(input)
-    
-    chmB = chm.GetRasterBand(1)
-    chmA = chmB.ReadAsArray()
-    chmA = (chmA-126)*0.232 #vaihe 1
-
-    focal = calcFocal(chmA,3) #vaihe 2
-    huip = focal - chmA
-    huip = np.where(focal-chmA==0,chmA,np.NaN)
-    huip = np.where(huip>=5,huip*10,np.NaN) #vaihe3
-    gdal_array.SaveArray(huip.astype("float32"),rastOut,"GTiff",chm)
-
-    return rastOut
-
-def calcFocal(in_array,etai):
-
-    dat =pd.DataFrame(in_array)
-    vert = dat
-    ijlist = []
-    for i in range(0-etai,etai):
-        for j in range(0-etai,etai):
-            e = sqrt(pow(i,2)+pow(j,2))
-            if e <=etai:
-                ijlist.append((i,j))
-    
-    #print (ijlist)
-
-    for i in ijlist:
-        df = dat.shift(i[0],axis=0)
-        df = df.shift(i[1],axis=1)
-        vert = pd.concat([vert,df]).max(level=0)
-    t = []
-    t.append(vert)
-    t = np.array(t)
-
-    return t
-#def getEuclidean(in_feat,)
-
-def vectorCHM(input):
-
-    """if os.path.isfile(out):
-        os.remove(out)
-        form = ['.shx','.dbf','prj']
-        for i in form:
-            f = out[:-4]+i
-            if os.path.isfile(f):
-                os.remove(f)"""
-    
-    #tempd = tempfile.TemporaryFile()
-    #tempd = tempd.name+'.shp'
-
-    tempd = processing.run("gdal:polygonize", {'INPUT':input,'BAND':1,'FIELD':'CHM','EIGHT_CONNECTEDNESS':False,'EXTRA':'','OUTPUT':'TEMPORARY_OUTPUT'})
-    
-    delNulls(tempd['OUTPUT'])
-    tempd = processing.run("native:centroids", {'INPUT':tempd['OUTPUT'],'ALL_PARTS':False,'OUTPUT':'TEMPORARY_OUTPUT'})
-    processing.run("native:createspatialindex", {'INPUT':tempd['OUTPUT']})
-
-    return tempd['OUTPUT']
-
-def delNulls(input):
-    input = QgsVectorLayer(input, "puukartta", "ogr")
-    
-
-    feats = input.getFeatures()
-    dfeat=[]
-    
-    for feat in feats:
-        if feat['CHM'] < 0:
-            dfeat.append(feat.id())
-
-    input.dataProvider().deleteFeatures(dfeat)
-
-def joinForestData(in_treemap,joinfeat,joinfields):
-    
-    joined = processing.run("native:joinattributesbylocation", {'INPUT':in_treemap,'JOIN':joinfeat,'PREDICATE':[0],'JOIN_FIELDS':joinfields,'METHOD':0,'DISCARD_NONMATCHING':False,'PREFIX':'','OUTPUT':'TEMPORARY_OUTPUT'})
-
-    return joined['OUTPUT']
-
-def getFeatureFromWfs(in_area,typename):
-    tempd = tempfile.TemporaryFile()
-    tempd = tempd.name+'.geojson'
-
-    
-    
-    bbox=getBboxWmsFormat(in_area)
-    #print ("bb: "+bbox[0])
-    in_url = 'http://rajapinnat.metsaan.fi/geoserver/Avoinmetsatieto/'+typename+'/ows?'
-    params = {'service':'wfs',
-          'request':'getFeature',
-          'typename':typename,
-          'bbox':bbox[0],
-          'outputFormat':'json',
-          'srsname':bbox[1]}
- 
-    
-    
-    try:
-        respo = requests.get(in_url,params,allow_redirects=True)
-        if respo.status_code != 200:
-            info = "Not getting connection to forest data: "+str(in_url)
-            infolevel = 3
-        else:
-            respo = respo.json()
-            with open(tempd, "w") as outfile:
-                json.dump(respo,outfile)
-            
-            respo = QgsVectorLayer(tempd,typename,"ogr")
-            info = "Forest data is ok"
-            infolevel = 1
-    
-    except:
-        info = "Not getting connection to forest data: "+str(in_url)
-        infolevel = 3
-    
-    
-    if respo.featureCount() == 0:
-        info = "Not able to find forest data from area: "+ str(bbox[0])
-        infolevel = 3
-    
-    return respo,info,infolevel
 
 
 def calculateDecayTreePotential(in_feat):
@@ -358,92 +104,8 @@ def calculateDecayTreePotential(in_feat):
     normalizeValue(in_feat,"dtree")
     #normalizeValue(in_feat,"DTW_1")
         
-def handleInput(in_feat):
-    fix = processing.run("native:fixgeometries", {'INPUT':in_feat,'OUTPUT':'TEMPORARY_OUTPUT'})
-    fix['OUTPUT'].dataProvider().addAttributes([QgsField("leimikko",QVariant.Double)])
-    fix['OUTPUT'].updateFields()
-    with edit(fix['OUTPUT']):
-        for feat in fix['OUTPUT'].getFeatures():
-            feat['leimikko']=1
 
-            fix['OUTPUT'].updateFeature(feat)
-    
-    return fix['OUTPUT']
 
-def geom2esri(in_area):
-
-    tempd = tempfile.TemporaryFile()
-    tempd = tempd.name+'.geojson'
-    
-    params = doESRIparam(in_area,"PaajakoNro,Nimi")
-    inurl = "https://paikkatieto.ymparisto.fi/arcgis/rest/services/INSPIRE/SYKE_EliomaantieteellisetAlueet/MapServer/0/query?"
-
-    x = requests.get(inurl,params)
-    rjs = json.loads(x.content)
-
-    with open(tempd, "w") as outfile:
-        json.dump(rjs,outfile)
-
-    fix = processing.run("native:fixgeometries", {'INPUT':tempd+'|geometrytype=Polygon','OUTPUT':'TEMPORARY_OUTPUT'})
-    #respo = QgsVectorLayer(tempd,"testi","ogr")
-
-    return fix['OUTPUT']
-
-def doESRIparam(in_feat,fields):
-    desc=in_feat.extent()
-    x_min=int(desc.xMinimum())
-    y_min=int(desc.yMinimum())
-    x_max=int(desc.xMaximum())+1
-    y_max=int(desc.yMaximum())+1
-    srid=str(in_feat.crs().authid())
-    srid=srid[5:]
-    #print (srid)
-
-    gparam = "geometryType=esriGeometryEnvelope&geometry="+str(x_min)+","+str(y_min)+","+str(x_max)+","+str(y_max)
-
-    params = {"geometry":gparam,
-                "geometryType":"esriGeometryEnvelope",
-                "inSR":srid,
-                "spatialRel":"esriSpatialRelIntersects",
-                "outFields":fields,
-                "geometryPrecision":3,
-                "outSR":srid,
-                "f":"geojson"}
-    return params
-
-def getProtectedSites(in_feat):
-    tempd = tempfile.TemporaryFile()
-    tempd = tempd.name+".geojson"
-   
-    params = doESRIparam(in_feat,"OBJECTID,Nimi")
- 
-    inurl = "https://paikkatieto.ymparisto.fi/arcgis/rest/services/INSPIRE/SYKE_SuojellutAlueet/MapServer/"
-
-    ser = ['2','3','4','7','8','9'] #rajataan natura- ja ls-alueisiin
-    proS = []
-    
-    for i in ser:
-        inu = inurl+i+"/query?"
-        x = requests.get(inu,params)
-        rjs = json.loads(x.content)
-        #te = tempd+'11.geojson'
-        with open(tempd, "w") as outfile:
-            json.dump(rjs,outfile)
-        try:
-            fix_ls = processing.run("native:fixgeometries",{'INPUT':tempd+'|geometrytype=Polygon','OUTPUT':'TEMPORARY_OUTPUT'})
-            proS.append(fix_ls['OUTPUT'])
-        except:
-            print ("no service")
-    
-    if len(proS)>0:
-        #fix_nat = processing.run("native:fixgeometries", {'INPUT':tempd+'|geometrytype=Polygon','OUTPUT':'TEMPORARY_OUTPUT'})
-        fix = processing.run("native:mergevectorlayers", {'LAYERS':proS,'CRS':None,'OUTPUT':'TEMPORARY_OUTPUT'})
-    
-        #fix = processing.run("native:dissolve", {'INPUT':fix['OUTPUT'], 'OUTPUT':'TEMPORARY_OUTPUT'})
-        return fix['OUTPUT']
-    else:
-        return None
-    #print("jeij")
 
 def calculateNPretention(in_feat):
     in_feat.dataProvider().addAttributes([QgsField("pRetent",QVariant.Double)])
@@ -460,8 +122,8 @@ def calculateNPretention(in_feat):
 
 
 def simpson_di(data):
-    N = sum(data.values())
-    n = sum(n*(n-1) for n in data.values() if n != 0)
+    N = sum(n for n  in data.values() if type(n) == int or type(n) == float)
+    n = sum(n*(n-1) for n in data.values() if type(n) == int or type(n) == float)
     if N-1 < 1:
         d = 0
     else:
@@ -475,7 +137,7 @@ def calculateBiodiversity(in_feat):
     
     with edit(in_feat):
         for feat in in_feat.getFeatures():
-            sim_di = simpson_di({'a':int(feat['STEMCOUNTPINE']),'b':int(feat['STEMCOUNTSPRUCE']),'c':int(feat['STEMCOUNTDECIDUOUS'])})
+            sim_di = simpson_di({'a':feat['STEMCOUNTPINE'],'b':feat['STEMCOUNTSPRUCE'],'c':feat['STEMCOUNTDECIDUOUS']})
             if feat['SPECIALFEATURECODE'] is not None:
                 conver_cof = sim_di * 0.1
             else:

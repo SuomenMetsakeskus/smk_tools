@@ -50,6 +50,52 @@ def raster2vector(in_rast,data):
     
     return vect
 
+def raster2vector2(in_rast,data):
+    """transfrom input buffer zone raster to vector"""
+    vectn = processing.run("gdal:polygonize", 
+        {'INPUT':in_rast,
+        'BAND':1,
+        'FIELD':'DN',
+        'EIGHT_CONNECTEDNESS':False,
+        'EXTRA':'',
+        'OUTPUT':'TEMPORARY_OUTPUT'})
+    
+    vect = QgsVectorLayer(vectn['OUTPUT'],"vyohyke","ogr")
+    #arealist = [feat.geometry().area() for feat in vect.getFeatures() if feat['DN']==1]
+    namelist = list(data.columns)
+    for i in namelist:
+        vect.dataProvider().addAttributes([QgsField(i,QVariant.Double)])
+        vect.updateFields()
+    
+    #ids = [(i.id(),i) for i in vect.getFeatures()]
+    #fs = [i for i in]
+    geom = [i.geometry().buffer(15,5) for i in vect.getFeatures()]
+    g=geom[0]
+    for i in geom:
+        geo = i.combine(g)
+         
+    c = 0
+    with edit(vect):
+        for feat in vect.getFeatures():
+            if c == 0:
+
+                for i in namelist:
+                    datac = data[[i]]
+                    print (datac.iloc[0,0])
+                    feat[i] = float(datac.iloc[0,0])
+            
+                #geom = feat.geometry()
+                #buffer = geom.buffer(15, 5)
+                buffer = geo.buffer(-14,5)
+                feat.setGeometry(buffer)
+                feat['pinta_ala'] = round(buffer.area()/10000,2)
+                vect.updateFeature(feat)
+                c = 1
+            else:
+                vect.deleteFeature(feat.id())
+        vect.commitChanges()
+    return vect
+
 def cleanGeom(vector):
     """cleans input vector geometry by buffering algorithm"""
     #vector = QgsVectorLayer(vector,"vect","ogr")
