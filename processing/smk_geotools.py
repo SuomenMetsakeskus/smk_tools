@@ -1,12 +1,23 @@
 from osgeo import gdal,gdal_array
-import os
+import os,sys,tempfile
 from math import sqrt
-import sys
 import pandas as pd
 import numpy as np
 from qgis.PyQt.QtCore import QVariant
 from qgis import processing
-from qgis.core import QgsVectorLayer,QgsField,QgsFeature,edit
+#import processing
+from qgis.core import QgsVectorLayer,QgsField,QgsFeature,edit,QgsApplication
+from qgis.analysis import QgsInterpolator,QgsIDWInterpolator,QgsGridFileWriter
+
+#for developing
+QgsApplication.setPrefixPath(QgsApplication.prefixPath(), True)
+qgs = QgsApplication([], False)
+qgs.initQgis()
+#import processing
+#from processing.core.Processing import Processing
+#Processing.initialize()
+#import processing
+from qgis.analysis import QgsNativeAlgorithms
 
 
 
@@ -140,3 +151,37 @@ def joinIntersection(inlayer,joinlayer,joinfields):
     joined = processing.run("native:joinattributesbylocation", {'INPUT':inlayer,'JOIN':joinlayer,'PREDICATE':[0],'JOIN_FIELDS':joinfields,'METHOD':0,'DISCARD_NONMATCHING':False,'PREFIX':'','OUTPUT':'TEMPORARY_OUTPUT'})
 
     return joined['OUTPUT']
+
+def hsAnalysis(in_feat,fieldname):
+    """
+    This interpolate field value of point layer. Input layer need to be QgsVectorLayer format
+    and fieldname string format. The analysis save interpolated values to new field of point layer with prefix 'HS_'
+    """
+    #in_feat = QgsVectorLayer(in_feat,"tt","ogr")
+
+    tempd = tempfile.TemporaryFile()
+    tempd = tempd.name+'.tif'
+
+    ext = in_feat.extent()
+    idx = in_feat.dataProvider().fieldNameIndex(fieldname)
+
+    layer_data = QgsInterpolator.LayerData()
+    layer_data.source = in_feat 
+    layer_data.zCoordInterpolation = False
+    layer_data.interpolationAttribute = idx
+    layer_data.mInputType = 1
+
+
+    idw_interpolator = QgsIDWInterpolator([layer_data])
+    res = 1
+    ncols = int( ( ext.xMaximum() - ext.xMinimum() ) / res )
+    nrows = int( (ext.yMaximum() - ext.yMinimum() ) / res)
+
+    out  = QgsGridFileWriter(idw_interpolator,tempd,ext,ncols,nrows)
+    out.writeFile()
+
+    out = processing.run("native:rastersampling", {'INPUT':in_feat,'RASTERCOPY':tempd,'COLUMN_PREFIX':'HS_','OUTPUT':'TEMPORARY_OUTPUT'})
+ 
+    #hs = processing.run("qgis:idwinterpolation",{'INTERPOLATION_DATA':in_name+"::~::0::~::"+str(idx)+"::~::0",'DISTANCE_COEFFICIENT':2,'EXTENT':ext,'PIXEL_SIZE':1,'OUTPUT':'TEMPORARY_OUTPUT'})
+    
+    return out
