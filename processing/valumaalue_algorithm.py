@@ -21,7 +21,7 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingFeatureSourceDefinition,
                        QgsFeatureRequest)
 
-from getInput import getBboxWmsFormat
+from getInput import getWebRasterLayer
 from getInput import getWater
 from fcFunctions import raster2vector2
 
@@ -31,7 +31,10 @@ pluginPath = os.path.abspath(
         os.pardir))
 
 class Valumamalli(QgsProcessingAlgorithm):
-    jako5 = QgsVectorLayer("crs='EPSG:3067' crs='EPSG:3067' url='https://aineistot.metsakeskus.fi/metsakeskus/rest/services/Luontotieto/Valumaalueet_t5/MapServer/0'","jako5","arcgisfeatureserver")
+    jako5 = QgsVectorLayer("crs='EPSG:3067' url='https://aineistot.metsakeskus.fi/metsakeskus/rest/services/Luontotieto/Valumaalueet_t5/MapServer/0' http-header:referer=''","jako5","arcgisfeatureserver")
+    DEMurl = "https://aineistot.metsakeskus.fi/metsakeskus/rest/services/Vesiensuojelu/DEM/ImageServer"
+    D8url = "https://aineistot.metsakeskus.fi/metsakeskus/rest/services/Vesiensuojelu/D8_suomi/ImageServer"
+
     #jako5 = iface.addVectorLayer(jako5l)
     def initAlgorithm(self, config=None):
         self.addParameter(QgsProcessingParameterNumber('tartunta', 'Tartuntaetäisyys', type=QgsProcessingParameterNumber.Integer, minValue=0, maxValue=20, defaultValue=5))
@@ -69,8 +72,8 @@ class Valumamalli(QgsProcessingAlgorithm):
                             'OUTPUT':QgsProcessing.TEMPORARY_OUTPUT},context=context, feedback=feedback, is_child_algorithm=True)
 
         jako5_raj = jako5_raj['OUTPUT']
-        
-
+        #feedback.pushInfo("jotain: "+jako5_raj)
+        #feedback.pushInfo(coords = "%f,%f,%f,%f" %(jako5_raj.extent().xMinimum(), jako5_raj.extent().xMaximum(), jako5_raj.extent().yMinimum(), jako5_raj.extent().yMaximum()))
         feedback.setCurrentStep(2)
         if feedback.isCanceled():
             return {}
@@ -88,15 +91,15 @@ class Valumamalli(QgsProcessingAlgorithm):
         #results['Valuma'] = parameters['Valuma']
 
         jako5_raj = jako5_raj['OUTPUT']
-        #jako5_raj.updateExtents()
+        jako5_raj.updateExtents()
 
         feedback.setCurrentStep(3)
         if feedback.isCanceled():
             return {}
         
-        DEM = getWater(jako5_raj,"DEM")
+        DEM = getWebRasterLayer(jako5_raj,self.DEMurl,"")
         feedback.pushInfo(DEM[1])
-        D8= getWater(jako5_raj,"D8_suomi")
+        D8= getWebRasterLayer(jako5_raj,self.D8url,"")
         feedback.pushInfo(D8[1])
 
         d8_raj = processing.run("grass7:r.reclass",

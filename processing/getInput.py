@@ -91,7 +91,7 @@ def doESRIfeatParams(input_polygon:QgsVectorLayer,name:str,attributes:str):
     srid=str(input_polygon.crs().authid())
     srid=srid[5:]
     #print (srid)
-    input_polygon.set
+    #input_polygon.set
     gparam = "geometryType=esriGeometryEnvelope&geometry="+str(x_min)+","+str(y_min)+","+str(x_max)+","+str(y_max)
 
     params = {"geometry":gparam,
