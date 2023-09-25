@@ -13,6 +13,10 @@ from qgis.analysis import QgsInterpolator,QgsIDWInterpolator,QgsGridFileWriter
 QgsApplication.setPrefixPath(QgsApplication.prefixPath(), True)
 qgs = QgsApplication([], False)
 qgs.initQgis()
+sys.path.append(os.path.join(QgsApplication.prefixPath(),"python\plugins"))
+import processing
+from processing.core.Processing import Processing
+Processing.initialize()
 #import processing
 #from processing.core.Processing import Processing
 #Processing.initialize()
@@ -184,4 +188,4 @@ def hsAnalysis(in_feat,fieldname):
  
     #hs = processing.run("qgis:idwinterpolation",{'INTERPOLATION_DATA':in_name+"::~::0::~::"+str(idx)+"::~::0",'DISTANCE_COEFFICIENT':2,'EXTENT':ext,'PIXEL_SIZE':1,'OUTPUT':'TEMPORARY_OUTPUT'})
     
-    return out
+    return out['OUTPUT']

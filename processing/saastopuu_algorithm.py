@@ -75,7 +75,7 @@ class saastopuu_toolsAlgorithm(QgsProcessingAlgorithm):
     dtw_data = 'https://paituli.csc.fi/geoserver/paituli/wcs?'
     mkasviv_data = 'https://paikkatieto.ymparisto.fi/arcgis/rest/services/INSPIRE/SYKE_EliomaantieteellisetAlueet/MapServer/0'
     euc_data = 'https://aineistot.metsakeskus.fi/metsakeskus/rest/services/Vesiensuojelu/euclidean/ImageServer'
-
+    
     stand_name = 'stand'
     gname = 'gridcell'
     dtw_name = 'paituli:luke_dtw_04'
