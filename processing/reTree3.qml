@@ -1,195 +1,270 @@
 <!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
-<qgis simplifyDrawingTol="1" hasScaleBasedVisibilityFlag="0" maxScale="0" simplifyMaxScale="1" simplifyAlgorithm="0" simplifyDrawingHints="0" symbologyReferenceScale="-1" readOnly="0" simplifyLocal="1" styleCategories="AllStyleCategories" version="3.22.5-Białowieża" minScale="100000000" labelsEnabled="0">
+<qgis minScale="100000000" version="3.28.2-Firenze" simplifyDrawingTol="1" labelsEnabled="0" styleCategories="AllStyleCategories" simplifyDrawingHints="0" simplifyAlgorithm="0" simplifyMaxScale="1" maxScale="0" symbologyReferenceScale="-1" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" readOnly="0">
   <flags>
     <Identifiable>1</Identifiable>
     <Removable>1</Removable>
     <Searchable>1</Searchable>
     <Private>0</Private>
   </flags>
-  <temporal enabled="0" endField="" durationUnit="min" startExpression="" accumulate="0" limitMode="0" startField="" endExpression="" mode="0" durationField="" fixedDuration="0">
+  <temporal startField="" startExpression="" enabled="0" limitMode="0" endExpression="" accumulate="0" mode="0" fixedDuration="0" durationField="" endField="" durationUnit="min">
     <fixedRange>
       <start></start>
       <end></end>
     </fixedRange>
   </temporal>
-  <renderer-v2 type="categorizedSymbol" referencescale="-1" attr="reTree" forceraster="0" symbollevels="0" enableorderby="0">
-    <categories>
-      <category symbol="0" render="true" value="1" label="Valittu säästöpuu"/>
-      <category symbol="1" render="true" value="0" label="Valittu hakkuuseen"/>
-    </categories>
-    <symbols>
-      <symbol alpha="1" type="marker" force_rhr="0" clip_to_extent="1" name="0">
+  <elevation showMarkerSymbolInSurfacePlots="0" symbology="Line" extrusion="0" zscale="1" respectLayerSymbol="1" zoffset="0" binding="Centroid" clamping="Terrain" extrusionEnabled="0" type="IndividualFeatures">
+    <data-defined-properties>
+      <Option type="Map">
+        <Option name="name" type="QString" value=""/>
+        <Option name="properties"/>
+        <Option name="type" type="QString" value="collection"/>
+      </Option>
+    </data-defined-properties>
+    <profileLineSymbol>
+      <symbol alpha="1" clip_to_extent="1" is_animated="0" name="" frame_rate="10" type="line" force_rhr="0">
         <data_defined_properties>
           <Option type="Map">
-            <Option value="" type="QString" name="name"/>
+            <Option name="name" type="QString" value=""/>
             <Option name="properties"/>
-            <Option value="collection" type="QString" name="type"/>
+            <Option name="type" type="QString" value="collection"/>
           </Option>
         </data_defined_properties>
-        <layer enabled="1" class="SimpleMarker" locked="0" pass="0">
+        <layer class="SimpleLine" enabled="1" pass="0" locked="0">
           <Option type="Map">
-            <Option value="0" type="QString" name="angle"/>
-            <Option value="square" type="QString" name="cap_style"/>
-            <Option value="109,9,36,255" type="QString" name="color"/>
-            <Option value="1" type="QString" name="horizontal_anchor_point"/>
-            <Option value="bevel" type="QString" name="joinstyle"/>
-            <Option value="circle" type="QString" name="name"/>
-            <Option value="0,0" type="QString" name="offset"/>
-            <Option value="3x:0,0,0,0,0,0" type="QString" name="offset_map_unit_scale"/>
-            <Option value="MM" type="QString" name="offset_unit"/>
-            <Option value="35,35,35,255" type="QString" name="outline_color"/>
-            <Option value="solid" type="QString" name="outline_style"/>
-            <Option value="0" type="QString" name="outline_width"/>
-            <Option value="3x:0,0,0,0,0,0" type="QString" name="outline_width_map_unit_scale"/>
-            <Option value="MM" type="QString" name="outline_width_unit"/>
-            <Option value="diameter" type="QString" name="scale_method"/>
-            <Option value="3" type="QString" name="size"/>
-            <Option value="3x:0,0,0,0,0,0" type="QString" name="size_map_unit_scale"/>
-            <Option value="MM" type="QString" name="size_unit"/>
-            <Option value="1" type="QString" name="vertical_anchor_point"/>
+            <Option name="align_dash_pattern" type="QString" value="0"/>
+            <Option name="capstyle" type="QString" value="square"/>
+            <Option name="customdash" type="QString" value="5;2"/>
+            <Option name="customdash_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
+            <Option name="customdash_unit" type="QString" value="MM"/>
+            <Option name="dash_pattern_offset" type="QString" value="0"/>
+            <Option name="dash_pattern_offset_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
+            <Option name="dash_pattern_offset_unit" type="QString" value="MM"/>
+            <Option name="draw_inside_polygon" type="QString" value="0"/>
+            <Option name="joinstyle" type="QString" value="bevel"/>
+            <Option name="line_color" type="QString" value="232,113,141,255"/>
+            <Option name="line_style" type="QString" value="solid"/>
+            <Option name="line_width" type="QString" value="0.6"/>
+            <Option name="line_width_unit" type="QString" value="MM"/>
+            <Option name="offset" type="QString" value="0"/>
+            <Option name="offset_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
+            <Option name="offset_unit" type="QString" value="MM"/>
+            <Option name="ring_filter" type="QString" value="0"/>
+            <Option name="trim_distance_end" type="QString" value="0"/>
+            <Option name="trim_distance_end_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
+            <Option name="trim_distance_end_unit" type="QString" value="MM"/>
+            <Option name="trim_distance_start" type="QString" value="0"/>
+            <Option name="trim_distance_start_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
+            <Option name="trim_distance_start_unit" type="QString" value="MM"/>
+            <Option name="tweak_dash_pattern_on_corners" type="QString" value="0"/>
+            <Option name="use_custom_dash" type="QString" value="0"/>
+            <Option name="width_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
           </Option>
-          <prop v="0" k="angle"/>
-          <prop v="square" k="cap_style"/>
-          <prop v="109,9,36,255" k="color"/>
-          <prop v="1" k="horizontal_anchor_point"/>
-          <prop v="bevel" k="joinstyle"/>
-          <prop v="circle" k="name"/>
-          <prop v="0,0" k="offset"/>
-          <prop v="3x:0,0,0,0,0,0" k="offset_map_unit_scale"/>
-          <prop v="MM" k="offset_unit"/>
-          <prop v="35,35,35,255" k="outline_color"/>
-          <prop v="solid" k="outline_style"/>
-          <prop v="0" k="outline_width"/>
-          <prop v="3x:0,0,0,0,0,0" k="outline_width_map_unit_scale"/>
-          <prop v="MM" k="outline_width_unit"/>
-          <prop v="diameter" k="scale_method"/>
-          <prop v="3" k="size"/>
-          <prop v="3x:0,0,0,0,0,0" k="size_map_unit_scale"/>
-          <prop v="MM" k="size_unit"/>
-          <prop v="1" k="vertical_anchor_point"/>
           <data_defined_properties>
             <Option type="Map">
-              <Option value="" type="QString" name="name"/>
+              <Option name="name" type="QString" value=""/>
               <Option name="properties"/>
-              <Option value="collection" type="QString" name="type"/>
+              <Option name="type" type="QString" value="collection"/>
             </Option>
           </data_defined_properties>
         </layer>
       </symbol>
-      <symbol alpha="1" type="marker" force_rhr="0" clip_to_extent="1" name="1">
+    </profileLineSymbol>
+    <profileFillSymbol>
+      <symbol alpha="1" clip_to_extent="1" is_animated="0" name="" frame_rate="10" type="fill" force_rhr="0">
         <data_defined_properties>
           <Option type="Map">
-            <Option value="" type="QString" name="name"/>
+            <Option name="name" type="QString" value=""/>
             <Option name="properties"/>
-            <Option value="collection" type="QString" name="type"/>
+            <Option name="type" type="QString" value="collection"/>
           </Option>
         </data_defined_properties>
-        <layer enabled="1" class="SimpleMarker" locked="0" pass="0">
+        <layer class="SimpleFill" enabled="1" pass="0" locked="0">
           <Option type="Map">
-            <Option value="0" type="QString" name="angle"/>
-            <Option value="square" type="QString" name="cap_style"/>
-            <Option value="206,125,54,255" type="QString" name="color"/>
-            <Option value="1" type="QString" name="horizontal_anchor_point"/>
-            <Option value="bevel" type="QString" name="joinstyle"/>
-            <Option value="circle" type="QString" name="name"/>
-            <Option value="0,0" type="QString" name="offset"/>
-            <Option value="3x:0,0,0,0,0,0" type="QString" name="offset_map_unit_scale"/>
-            <Option value="MM" type="QString" name="offset_unit"/>
-            <Option value="35,35,35,255" type="QString" name="outline_color"/>
-            <Option value="solid" type="QString" name="outline_style"/>
-            <Option value="0" type="QString" name="outline_width"/>
-            <Option value="3x:0,0,0,0,0,0" type="QString" name="outline_width_map_unit_scale"/>
-            <Option value="MM" type="QString" name="outline_width_unit"/>
-            <Option value="diameter" type="QString" name="scale_method"/>
-            <Option value="1.5" type="QString" name="size"/>
-            <Option value="3x:0,0,0,0,0,0" type="QString" name="size_map_unit_scale"/>
-            <Option value="MM" type="QString" name="size_unit"/>
-            <Option value="1" type="QString" name="vertical_anchor_point"/>
+            <Option name="border_width_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
+            <Option name="color" type="QString" value="232,113,141,255"/>
+            <Option name="joinstyle" type="QString" value="bevel"/>
+            <Option name="offset" type="QString" value="0,0"/>
+            <Option name="offset_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
+            <Option name="offset_unit" type="QString" value="MM"/>
+            <Option name="outline_color" type="QString" value="166,81,101,255"/>
+            <Option name="outline_style" type="QString" value="solid"/>
+            <Option name="outline_width" type="QString" value="0.2"/>
+            <Option name="outline_width_unit" type="QString" value="MM"/>
+            <Option name="style" type="QString" value="solid"/>
           </Option>
-          <prop v="0" k="angle"/>
-          <prop v="square" k="cap_style"/>
-          <prop v="206,125,54,255" k="color"/>
-          <prop v="1" k="horizontal_anchor_point"/>
-          <prop v="bevel" k="joinstyle"/>
-          <prop v="circle" k="name"/>
-          <prop v="0,0" k="offset"/>
-          <prop v="3x:0,0,0,0,0,0" k="offset_map_unit_scale"/>
-          <prop v="MM" k="offset_unit"/>
-          <prop v="35,35,35,255" k="outline_color"/>
-          <prop v="solid" k="outline_style"/>
-          <prop v="0" k="outline_width"/>
-          <prop v="3x:0,0,0,0,0,0" k="outline_width_map_unit_scale"/>
-          <prop v="MM" k="outline_width_unit"/>
-          <prop v="diameter" k="scale_method"/>
-          <prop v="1.5" k="size"/>
-          <prop v="3x:0,0,0,0,0,0" k="size_map_unit_scale"/>
-          <prop v="MM" k="size_unit"/>
-          <prop v="1" k="vertical_anchor_point"/>
           <data_defined_properties>
             <Option type="Map">
-              <Option value="" type="QString" name="name"/>
+              <Option name="name" type="QString" value=""/>
               <Option name="properties"/>
-              <Option value="collection" type="QString" name="type"/>
+              <Option name="type" type="QString" value="collection"/>
+            </Option>
+          </data_defined_properties>
+        </layer>
+      </symbol>
+    </profileFillSymbol>
+    <profileMarkerSymbol>
+      <symbol alpha="1" clip_to_extent="1" is_animated="0" name="" frame_rate="10" type="marker" force_rhr="0">
+        <data_defined_properties>
+          <Option type="Map">
+            <Option name="name" type="QString" value=""/>
+            <Option name="properties"/>
+            <Option name="type" type="QString" value="collection"/>
+          </Option>
+        </data_defined_properties>
+        <layer class="SimpleMarker" enabled="1" pass="0" locked="0">
+          <Option type="Map">
+            <Option name="angle" type="QString" value="0"/>
+            <Option name="cap_style" type="QString" value="square"/>
+            <Option name="color" type="QString" value="232,113,141,255"/>
+            <Option name="horizontal_anchor_point" type="QString" value="1"/>
+            <Option name="joinstyle" type="QString" value="bevel"/>
+            <Option name="name" type="QString" value="diamond"/>
+            <Option name="offset" type="QString" value="0,0"/>
+            <Option name="offset_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
+            <Option name="offset_unit" type="QString" value="MM"/>
+            <Option name="outline_color" type="QString" value="166,81,101,255"/>
+            <Option name="outline_style" type="QString" value="solid"/>
+            <Option name="outline_width" type="QString" value="0.2"/>
+            <Option name="outline_width_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
+            <Option name="outline_width_unit" type="QString" value="MM"/>
+            <Option name="scale_method" type="QString" value="diameter"/>
+            <Option name="size" type="QString" value="3"/>
+            <Option name="size_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
+            <Option name="size_unit" type="QString" value="MM"/>
+            <Option name="vertical_anchor_point" type="QString" value="1"/>
+          </Option>
+          <data_defined_properties>
+            <Option type="Map">
+              <Option name="name" type="QString" value=""/>
+              <Option name="properties"/>
+              <Option name="type" type="QString" value="collection"/>
+            </Option>
+          </data_defined_properties>
+        </layer>
+      </symbol>
+    </profileMarkerSymbol>
+  </elevation>
+  <renderer-v2 forceraster="0" attr="reTree" symbollevels="0" referencescale="-1" type="categorizedSymbol" enableorderby="0">
+    <categories>
+      <category label="Säästöpuuehdotus" render="true" symbol="0" value="1" type="string"/>
+      <category label="" render="false" symbol="1" value="0" type="string"/>
+    </categories>
+    <symbols>
+      <symbol alpha="1" clip_to_extent="1" is_animated="0" name="0" frame_rate="10" type="marker" force_rhr="0">
+        <data_defined_properties>
+          <Option type="Map">
+            <Option name="name" type="QString" value=""/>
+            <Option name="properties"/>
+            <Option name="type" type="QString" value="collection"/>
+          </Option>
+        </data_defined_properties>
+        <layer class="SimpleMarker" enabled="1" pass="0" locked="0">
+          <Option type="Map">
+            <Option name="angle" type="QString" value="0"/>
+            <Option name="cap_style" type="QString" value="square"/>
+            <Option name="color" type="QString" value="109,9,36,255"/>
+            <Option name="horizontal_anchor_point" type="QString" value="1"/>
+            <Option name="joinstyle" type="QString" value="bevel"/>
+            <Option name="name" type="QString" value="circle"/>
+            <Option name="offset" type="QString" value="0,0"/>
+            <Option name="offset_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
+            <Option name="offset_unit" type="QString" value="MM"/>
+            <Option name="outline_color" type="QString" value="35,35,35,255"/>
+            <Option name="outline_style" type="QString" value="solid"/>
+            <Option name="outline_width" type="QString" value="0"/>
+            <Option name="outline_width_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
+            <Option name="outline_width_unit" type="QString" value="MM"/>
+            <Option name="scale_method" type="QString" value="diameter"/>
+            <Option name="size" type="QString" value="3"/>
+            <Option name="size_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
+            <Option name="size_unit" type="QString" value="MM"/>
+            <Option name="vertical_anchor_point" type="QString" value="1"/>
+          </Option>
+          <data_defined_properties>
+            <Option type="Map">
+              <Option name="name" type="QString" value=""/>
+              <Option name="properties"/>
+              <Option name="type" type="QString" value="collection"/>
+            </Option>
+          </data_defined_properties>
+        </layer>
+      </symbol>
+      <symbol alpha="1" clip_to_extent="1" is_animated="0" name="1" frame_rate="10" type="marker" force_rhr="0">
+        <data_defined_properties>
+          <Option type="Map">
+            <Option name="name" type="QString" value=""/>
+            <Option name="properties"/>
+            <Option name="type" type="QString" value="collection"/>
+          </Option>
+        </data_defined_properties>
+        <layer class="SimpleMarker" enabled="1" pass="0" locked="0">
+          <Option type="Map">
+            <Option name="angle" type="QString" value="0"/>
+            <Option name="cap_style" type="QString" value="square"/>
+            <Option name="color" type="QString" value="206,125,54,255"/>
+            <Option name="horizontal_anchor_point" type="QString" value="1"/>
+            <Option name="joinstyle" type="QString" value="bevel"/>
+            <Option name="name" type="QString" value="circle"/>
+            <Option name="offset" type="QString" value="0,0"/>
+            <Option name="offset_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
+            <Option name="offset_unit" type="QString" value="MM"/>
+            <Option name="outline_color" type="QString" value="35,35,35,255"/>
+            <Option name="outline_style" type="QString" value="solid"/>
+            <Option name="outline_width" type="QString" value="0"/>
+            <Option name="outline_width_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
+            <Option name="outline_width_unit" type="QString" value="MM"/>
+            <Option name="scale_method" type="QString" value="diameter"/>
+            <Option name="size" type="QString" value="1.5"/>
+            <Option name="size_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
+            <Option name="size_unit" type="QString" value="MM"/>
+            <Option name="vertical_anchor_point" type="QString" value="1"/>
+          </Option>
+          <data_defined_properties>
+            <Option type="Map">
+              <Option name="name" type="QString" value=""/>
+              <Option name="properties"/>
+              <Option name="type" type="QString" value="collection"/>
             </Option>
           </data_defined_properties>
         </layer>
       </symbol>
     </symbols>
     <source-symbol>
-      <symbol alpha="1" type="marker" force_rhr="0" clip_to_extent="1" name="0">
+      <symbol alpha="1" clip_to_extent="1" is_animated="0" name="0" frame_rate="10" type="marker" force_rhr="0">
         <data_defined_properties>
           <Option type="Map">
-            <Option value="" type="QString" name="name"/>
+            <Option name="name" type="QString" value=""/>
             <Option name="properties"/>
-            <Option value="collection" type="QString" name="type"/>
+            <Option name="type" type="QString" value="collection"/>
           </Option>
         </data_defined_properties>
-        <layer enabled="1" class="SimpleMarker" locked="0" pass="0">
+        <layer class="SimpleMarker" enabled="1" pass="0" locked="0">
           <Option type="Map">
-            <Option value="0" type="QString" name="angle"/>
-            <Option value="square" type="QString" name="cap_style"/>
-            <Option value="229,182,54,255" type="QString" name="color"/>
-            <Option value="1" type="QString" name="horizontal_anchor_point"/>
-            <Option value="bevel" type="QString" name="joinstyle"/>
-            <Option value="circle" type="QString" name="name"/>
-            <Option value="0,0" type="QString" name="offset"/>
-            <Option value="3x:0,0,0,0,0,0" type="QString" name="offset_map_unit_scale"/>
-            <Option value="MM" type="QString" name="offset_unit"/>
-            <Option value="35,35,35,255" type="QString" name="outline_color"/>
-            <Option value="solid" type="QString" name="outline_style"/>
-            <Option value="0" type="QString" name="outline_width"/>
-            <Option value="3x:0,0,0,0,0,0" type="QString" name="outline_width_map_unit_scale"/>
-            <Option value="MM" type="QString" name="outline_width_unit"/>
-            <Option value="diameter" type="QString" name="scale_method"/>
-            <Option value="2" type="QString" name="size"/>
-            <Option value="3x:0,0,0,0,0,0" type="QString" name="size_map_unit_scale"/>
-            <Option value="MM" type="QString" name="size_unit"/>
-            <Option value="1" type="QString" name="vertical_anchor_point"/>
+            <Option name="angle" type="QString" value="0"/>
+            <Option name="cap_style" type="QString" value="square"/>
+            <Option name="color" type="QString" value="229,182,54,255"/>
+            <Option name="horizontal_anchor_point" type="QString" value="1"/>
+            <Option name="joinstyle" type="QString" value="bevel"/>
+            <Option name="name" type="QString" value="circle"/>
+            <Option name="offset" type="QString" value="0,0"/>
+            <Option name="offset_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
+            <Option name="offset_unit" type="QString" value="MM"/>
+            <Option name="outline_color" type="QString" value="35,35,35,255"/>
+            <Option name="outline_style" type="QString" value="solid"/>
+            <Option name="outline_width" type="QString" value="0"/>
+            <Option name="outline_width_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
+            <Option name="outline_width_unit" type="QString" value="MM"/>
+            <Option name="scale_method" type="QString" value="diameter"/>
+            <Option name="size" type="QString" value="2"/>
+            <Option name="size_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
+            <Option name="size_unit" type="QString" value="MM"/>
+            <Option name="vertical_anchor_point" type="QString" value="1"/>
           </Option>
-          <prop v="0" k="angle"/>
-          <prop v="square" k="cap_style"/>
-          <prop v="229,182,54,255" k="color"/>
-          <prop v="1" k="horizontal_anchor_point"/>
-          <prop v="bevel" k="joinstyle"/>
-          <prop v="circle" k="name"/>
-          <prop v="0,0" k="offset"/>
-          <prop v="3x:0,0,0,0,0,0" k="offset_map_unit_scale"/>
-          <prop v="MM" k="offset_unit"/>
-          <prop v="35,35,35,255" k="outline_color"/>
-          <prop v="solid" k="outline_style"/>
-          <prop v="0" k="outline_width"/>
-          <prop v="3x:0,0,0,0,0,0" k="outline_width_map_unit_scale"/>
-          <prop v="MM" k="outline_width_unit"/>
-          <prop v="diameter" k="scale_method"/>
-          <prop v="2" k="size"/>
-          <prop v="3x:0,0,0,0,0,0" k="size_map_unit_scale"/>
-          <prop v="MM" k="size_unit"/>
-          <prop v="1" k="vertical_anchor_point"/>
           <data_defined_properties>
             <Option type="Map">
-              <Option value="" type="QString" name="name"/>
+              <Option name="name" type="QString" value=""/>
               <Option name="properties"/>
-              <Option value="collection" type="QString" name="type"/>
+              <Option name="type" type="QString" value="collection"/>
             </Option>
           </data_defined_properties>
         </layer>
@@ -200,90 +275,63 @@
   </renderer-v2>
   <customproperties>
     <Option type="Map">
-      <Option value="false" type="bool" name="OnConvertFormatRegeneratePrimaryKey"/>
-      <Option value="0" type="int" name="embeddedWidgets/count"/>
-      <Option type="invalid" name="variableNames"/>
-      <Option type="invalid" name="variableValues"/>
+      <Option name="OnConvertFormatRegeneratePrimaryKey" type="bool" value="false"/>
+      <Option name="embeddedWidgets/count" type="int" value="0"/>
+      <Option name="variableNames"/>
+      <Option name="variableValues"/>
     </Option>
   </customproperties>
   <blendMode>0</blendMode>
   <featureBlendMode>0</featureBlendMode>
   <layerOpacity>1</layerOpacity>
-  <SingleCategoryDiagramRenderer diagramType="Histogram" attributeLegend="1">
-    <DiagramCategory enabled="0" spacingUnitScale="3x:0,0,0,0,0,0" spacing="5" diagramOrientation="Up" minScaleDenominator="0" lineSizeType="MM" rotationOffset="270" sizeType="MM" maxScaleDenominator="1e+08" width="15" opacity="1" barWidth="5" lineSizeScale="3x:0,0,0,0,0,0" showAxis="1" spacingUnit="MM" scaleDependency="Area" scaleBasedVisibility="0" height="15" penWidth="0" labelPlacementMethod="XHeight" backgroundColor="#ffffff" penColor="#000000" sizeScale="3x:0,0,0,0,0,0" minimumSize="0" backgroundAlpha="255" penAlpha="255" direction="0">
-      <fontProperties style="" description="MS Shell Dlg 2,7.8,-1,5,50,0,0,0,0,0"/>
-      <attribute field="" color="#000000" label=""/>
+  <SingleCategoryDiagramRenderer attributeLegend="1" diagramType="Histogram">
+    <DiagramCategory lineSizeScale="3x:0,0,0,0,0,0" scaleDependency="Area" spacing="5" backgroundColor="#ffffff" diagramOrientation="Up" rotationOffset="270" direction="0" showAxis="1" scaleBasedVisibility="0" width="15" backgroundAlpha="255" sizeScale="3x:0,0,0,0,0,0" penColor="#000000" spacingUnit="MM" minimumSize="0" maxScaleDenominator="1e+08" penAlpha="255" enabled="0" sizeType="MM" barWidth="5" lineSizeType="MM" minScaleDenominator="0" labelPlacementMethod="XHeight" penWidth="0" height="15" spacingUnitScale="3x:0,0,0,0,0,0" opacity="1">
+      <fontProperties bold="0" italic="0" strikethrough="0" style="" description="MS Shell Dlg 2,7.8,-1,5,50,0,0,0,0,0" underline="0"/>
+      <attribute label="" field="" colorOpacity="1" color="#000000"/>
       <axisSymbol>
-        <symbol alpha="1" type="line" force_rhr="0" clip_to_extent="1" name="">
+        <symbol alpha="1" clip_to_extent="1" is_animated="0" name="" frame_rate="10" type="line" force_rhr="0">
           <data_defined_properties>
             <Option type="Map">
-              <Option value="" type="QString" name="name"/>
+              <Option name="name" type="QString" value=""/>
               <Option name="properties"/>
-              <Option value="collection" type="QString" name="type"/>
+              <Option name="type" type="QString" value="collection"/>
             </Option>
           </data_defined_properties>
-          <layer enabled="1" class="SimpleLine" locked="0" pass="0">
+          <layer class="SimpleLine" enabled="1" pass="0" locked="0">
             <Option type="Map">
-              <Option value="0" type="QString" name="align_dash_pattern"/>
-              <Option value="square" type="QString" name="capstyle"/>
-              <Option value="5;2" type="QString" name="customdash"/>
-              <Option value="3x:0,0,0,0,0,0" type="QString" name="customdash_map_unit_scale"/>
-              <Option value="MM" type="QString" name="customdash_unit"/>
-              <Option value="0" type="QString" name="dash_pattern_offset"/>
-              <Option value="3x:0,0,0,0,0,0" type="QString" name="dash_pattern_offset_map_unit_scale"/>
-              <Option value="MM" type="QString" name="dash_pattern_offset_unit"/>
-              <Option value="0" type="QString" name="draw_inside_polygon"/>
-              <Option value="bevel" type="QString" name="joinstyle"/>
-              <Option value="35,35,35,255" type="QString" name="line_color"/>
-              <Option value="solid" type="QString" name="line_style"/>
-              <Option value="0.26" type="QString" name="line_width"/>
-              <Option value="MM" type="QString" name="line_width_unit"/>
-              <Option value="0" type="QString" name="offset"/>
-              <Option value="3x:0,0,0,0,0,0" type="QString" name="offset_map_unit_scale"/>
-              <Option value="MM" type="QString" name="offset_unit"/>
-              <Option value="0" type="QString" name="ring_filter"/>
-              <Option value="0" type="QString" name="trim_distance_end"/>
-              <Option value="3x:0,0,0,0,0,0" type="QString" name="trim_distance_end_map_unit_scale"/>
-              <Option value="MM" type="QString" name="trim_distance_end_unit"/>
-              <Option value="0" type="QString" name="trim_distance_start"/>
-              <Option value="3x:0,0,0,0,0,0" type="QString" name="trim_distance_start_map_unit_scale"/>
-              <Option value="MM" type="QString" name="trim_distance_start_unit"/>
-              <Option value="0" type="QString" name="tweak_dash_pattern_on_corners"/>
-              <Option value="0" type="QString" name="use_custom_dash"/>
-              <Option value="3x:0,0,0,0,0,0" type="QString" name="width_map_unit_scale"/>
+              <Option name="align_dash_pattern" type="QString" value="0"/>
+              <Option name="capstyle" type="QString" value="square"/>
+              <Option name="customdash" type="QString" value="5;2"/>
+              <Option name="customdash_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
+              <Option name="customdash_unit" type="QString" value="MM"/>
+              <Option name="dash_pattern_offset" type="QString" value="0"/>
+              <Option name="dash_pattern_offset_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
+              <Option name="dash_pattern_offset_unit" type="QString" value="MM"/>
+              <Option name="draw_inside_polygon" type="QString" value="0"/>
+              <Option name="joinstyle" type="QString" value="bevel"/>
+              <Option name="line_color" type="QString" value="35,35,35,255"/>
+              <Option name="line_style" type="QString" value="solid"/>
+              <Option name="line_width" type="QString" value="0.26"/>
+              <Option name="line_width_unit" type="QString" value="MM"/>
+              <Option name="offset" type="QString" value="0"/>
+              <Option name="offset_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
+              <Option name="offset_unit" type="QString" value="MM"/>
+              <Option name="ring_filter" type="QString" value="0"/>
+              <Option name="trim_distance_end" type="QString" value="0"/>
+              <Option name="trim_distance_end_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
+              <Option name="trim_distance_end_unit" type="QString" value="MM"/>
+              <Option name="trim_distance_start" type="QString" value="0"/>
+              <Option name="trim_distance_start_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
+              <Option name="trim_distance_start_unit" type="QString" value="MM"/>
+              <Option name="tweak_dash_pattern_on_corners" type="QString" value="0"/>
+              <Option name="use_custom_dash" type="QString" value="0"/>
+              <Option name="width_map_unit_scale" type="QString" value="3x:0,0,0,0,0,0"/>
             </Option>
-            <prop v="0" k="align_dash_pattern"/>
-            <prop v="square" k="capstyle"/>
-            <prop v="5;2" k="customdash"/>
-            <prop v="3x:0,0,0,0,0,0" k="customdash_map_unit_scale"/>
-            <prop v="MM" k="customdash_unit"/>
-            <prop v="0" k="dash_pattern_offset"/>
-            <prop v="3x:0,0,0,0,0,0" k="dash_pattern_offset_map_unit_scale"/>
-            <prop v="MM" k="dash_pattern_offset_unit"/>
-            <prop v="0" k="draw_inside_polygon"/>
-            <prop v="bevel" k="joinstyle"/>
-            <prop v="35,35,35,255" k="line_color"/>
-            <prop v="solid" k="line_style"/>
-            <prop v="0.26" k="line_width"/>
-            <prop v="MM" k="line_width_unit"/>
-            <prop v="0" k="offset"/>
-            <prop v="3x:0,0,0,0,0,0" k="offset_map_unit_scale"/>
-            <prop v="MM" k="offset_unit"/>
-            <prop v="0" k="ring_filter"/>
-            <prop v="0" k="trim_distance_end"/>
-            <prop v="3x:0,0,0,0,0,0" k="trim_distance_end_map_unit_scale"/>
-            <prop v="MM" k="trim_distance_end_unit"/>
-            <prop v="0" k="trim_distance_start"/>
-            <prop v="3x:0,0,0,0,0,0" k="trim_distance_start_map_unit_scale"/>
-            <prop v="MM" k="trim_distance_start_unit"/>
-            <prop v="0" k="tweak_dash_pattern_on_corners"/>
-            <prop v="0" k="use_custom_dash"/>
-            <prop v="3x:0,0,0,0,0,0" k="width_map_unit_scale"/>
             <data_defined_properties>
               <Option type="Map">
-                <Option value="" type="QString" name="name"/>
+                <Option name="name" type="QString" value=""/>
                 <Option name="properties"/>
-                <Option value="collection" type="QString" name="type"/>
+                <Option name="type" type="QString" value="collection"/>
               </Option>
             </data_defined_properties>
           </layer>
@@ -291,20 +339,20 @@
       </axisSymbol>
     </DiagramCategory>
   </SingleCategoryDiagramRenderer>
-  <DiagramLayerSettings dist="0" placement="0" obstacle="0" priority="0" linePlacementFlags="18" zIndex="0" showAll="1">
+  <DiagramLayerSettings obstacle="0" linePlacementFlags="18" zIndex="0" priority="0" dist="0" showAll="1" placement="0">
     <properties>
       <Option type="Map">
-        <Option value="" type="QString" name="name"/>
+        <Option name="name" type="QString" value=""/>
         <Option name="properties"/>
-        <Option value="collection" type="QString" name="type"/>
+        <Option name="type" type="QString" value="collection"/>
       </Option>
     </properties>
   </DiagramLayerSettings>
-  <geometryOptions geometryPrecision="0" removeDuplicateNodes="0">
+  <geometryOptions removeDuplicateNodes="0" geometryPrecision="0">
     <activeChecks/>
     <checkConfiguration/>
   </geometryOptions>
-  <legend type="default-vector" showLabelLegend="0"/>
+  <legend showLabelLegend="0" type="default-vector"/>
   <referencedLayers/>
   <fieldConfiguration>
     <field name="CHM" configurationFlags="None">
@@ -419,13 +467,6 @@
         </config>
       </editWidget>
     </field>
-    <field name="OBJECTID" configurationFlags="None">
-      <editWidget type="Range">
-        <config>
-          <Option/>
-        </config>
-      </editWidget>
-    </field>
     <field name="Nimi_2" configurationFlags="None">
       <editWidget type="TextEdit">
         <config>
@@ -475,20 +516,6 @@
         </config>
       </editWidget>
     </field>
-    <field name="dtree" configurationFlags="None">
-      <editWidget type="TextEdit">
-        <config>
-          <Option/>
-        </config>
-      </editWidget>
-    </field>
-    <field name="dtreen" configurationFlags="None">
-      <editWidget type="TextEdit">
-        <config>
-          <Option/>
-        </config>
-      </editWidget>
-    </field>
     <field name="biod" configurationFlags="None">
       <editWidget type="TextEdit">
         <config>
@@ -497,6 +524,20 @@
       </editWidget>
     </field>
     <field name="biodn" configurationFlags="None">
+      <editWidget type="TextEdit">
+        <config>
+          <Option/>
+        </config>
+      </editWidget>
+    </field>
+    <field name="dtree" configurationFlags="None">
+      <editWidget type="TextEdit">
+        <config>
+          <Option/>
+        </config>
+      </editWidget>
+    </field>
+    <field name="dtreen" configurationFlags="None">
       <editWidget type="TextEdit">
         <config>
           <Option/>
@@ -556,23 +597,22 @@
     <alias field="MEANHEIGHTSPRUCE" index="13" name=""/>
     <alias field="PaajakoNro" index="14" name=""/>
     <alias field="Nimi" index="15" name=""/>
-    <alias field="OBJECTID" index="16" name=""/>
-    <alias field="Nimi_2" index="17" name=""/>
-    <alias field="layer" index="18" name=""/>
-    <alias field="path" index="19" name=""/>
-    <alias field="leimikko" index="20" name=""/>
-    <alias field="DTW_1" index="21" name=""/>
-    <alias field="euc_1" index="22" name=""/>
-    <alias field="DTW_1n" index="23" name=""/>
-    <alias field="dtree" index="24" name=""/>
-    <alias field="dtreen" index="25" name=""/>
-    <alias field="biod" index="26" name=""/>
-    <alias field="biodn" index="27" name=""/>
-    <alias field="pRetent" index="28" name=""/>
-    <alias field="pRetentn" index="29" name=""/>
-    <alias field="env_value" index="30" name=""/>
-    <alias field="HS_1" index="31" name=""/>
-    <alias field="reTree" index="32" name=""/>
+    <alias field="Nimi_2" index="16" name=""/>
+    <alias field="layer" index="17" name=""/>
+    <alias field="path" index="18" name=""/>
+    <alias field="leimikko" index="19" name=""/>
+    <alias field="DTW_1" index="20" name=""/>
+    <alias field="euc_1" index="21" name=""/>
+    <alias field="DTW_1n" index="22" name=""/>
+    <alias field="biod" index="23" name=""/>
+    <alias field="biodn" index="24" name=""/>
+    <alias field="dtree" index="25" name=""/>
+    <alias field="dtreen" index="26" name=""/>
+    <alias field="pRetent" index="27" name=""/>
+    <alias field="pRetentn" index="28" name=""/>
+    <alias field="env_value" index="29" name=""/>
+    <alias field="HS_1" index="30" name=""/>
+    <alias field="reTree" index="31" name=""/>
   </aliases>
   <defaults>
     <default field="CHM" expression="" applyOnUpdate="0"/>
@@ -591,7 +631,6 @@
     <default field="MEANHEIGHTSPRUCE" expression="" applyOnUpdate="0"/>
     <default field="PaajakoNro" expression="" applyOnUpdate="0"/>
     <default field="Nimi" expression="" applyOnUpdate="0"/>
-    <default field="OBJECTID" expression="" applyOnUpdate="0"/>
     <default field="Nimi_2" expression="" applyOnUpdate="0"/>
     <default field="layer" expression="" applyOnUpdate="0"/>
     <default field="path" expression="" applyOnUpdate="0"/>
@@ -599,10 +638,10 @@
     <default field="DTW_1" expression="" applyOnUpdate="0"/>
     <default field="euc_1" expression="" applyOnUpdate="0"/>
     <default field="DTW_1n" expression="" applyOnUpdate="0"/>
-    <default field="dtree" expression="" applyOnUpdate="0"/>
-    <default field="dtreen" expression="" applyOnUpdate="0"/>
     <default field="biod" expression="" applyOnUpdate="0"/>
     <default field="biodn" expression="" applyOnUpdate="0"/>
+    <default field="dtree" expression="" applyOnUpdate="0"/>
+    <default field="dtreen" expression="" applyOnUpdate="0"/>
     <default field="pRetent" expression="" applyOnUpdate="0"/>
     <default field="pRetentn" expression="" applyOnUpdate="0"/>
     <default field="env_value" expression="" applyOnUpdate="0"/>
@@ -610,115 +649,112 @@
     <default field="reTree" expression="" applyOnUpdate="0"/>
   </defaults>
   <constraints>
-    <constraint field="CHM" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="SPECIALFEATURECODE" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="SPECIALFEATUREADDITIONALCODE" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="FERTILITYCLASS" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="DEVELOPMENTCLASS" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="STEMCOUNTPINE" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="STEMCOUNTDECIDUOUS" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="STEMCOUNTSPRUCE" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="MEANDIAMETERDECIDUOUS" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="MEANDIAMETERPINE" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="MEANDIAMETERSPRUCE" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="MEANHEIGHTDECIDUOUS" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="MEANHEIGHTPINE" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="MEANHEIGHTSPRUCE" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="PaajakoNro" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="Nimi" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="OBJECTID" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="Nimi_2" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="layer" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="path" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="leimikko" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="DTW_1" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="euc_1" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="DTW_1n" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="dtree" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="dtreen" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="biod" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="biodn" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="pRetent" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="pRetentn" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="env_value" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="HS_1" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="reTree" unique_strength="0" constraints="0" notnull_strength="0" exp_strength="0"/>
+    <constraint field="CHM" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="SPECIALFEATURECODE" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="SPECIALFEATUREADDITIONALCODE" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="FERTILITYCLASS" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="DEVELOPMENTCLASS" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="STEMCOUNTPINE" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="STEMCOUNTDECIDUOUS" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="STEMCOUNTSPRUCE" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="MEANDIAMETERDECIDUOUS" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="MEANDIAMETERPINE" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="MEANDIAMETERSPRUCE" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="MEANHEIGHTDECIDUOUS" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="MEANHEIGHTPINE" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="MEANHEIGHTSPRUCE" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="PaajakoNro" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="Nimi" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="Nimi_2" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="layer" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="path" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="leimikko" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="DTW_1" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="euc_1" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="DTW_1n" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="biod" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="biodn" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="dtree" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="dtreen" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="pRetent" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="pRetentn" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="env_value" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="HS_1" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
+    <constraint field="reTree" unique_strength="0" exp_strength="0" constraints="0" notnull_strength="0"/>
   </constraints>
   <constraintExpressions>
-    <constraint field="CHM" desc="" exp=""/>
-    <constraint field="SPECIALFEATURECODE" desc="" exp=""/>
-    <constraint field="SPECIALFEATUREADDITIONALCODE" desc="" exp=""/>
-    <constraint field="FERTILITYCLASS" desc="" exp=""/>
-    <constraint field="DEVELOPMENTCLASS" desc="" exp=""/>
-    <constraint field="STEMCOUNTPINE" desc="" exp=""/>
-    <constraint field="STEMCOUNTDECIDUOUS" desc="" exp=""/>
-    <constraint field="STEMCOUNTSPRUCE" desc="" exp=""/>
-    <constraint field="MEANDIAMETERDECIDUOUS" desc="" exp=""/>
-    <constraint field="MEANDIAMETERPINE" desc="" exp=""/>
-    <constraint field="MEANDIAMETERSPRUCE" desc="" exp=""/>
-    <constraint field="MEANHEIGHTDECIDUOUS" desc="" exp=""/>
-    <constraint field="MEANHEIGHTPINE" desc="" exp=""/>
-    <constraint field="MEANHEIGHTSPRUCE" desc="" exp=""/>
-    <constraint field="PaajakoNro" desc="" exp=""/>
-    <constraint field="Nimi" desc="" exp=""/>
-    <constraint field="OBJECTID" desc="" exp=""/>
-    <constraint field="Nimi_2" desc="" exp=""/>
-    <constraint field="layer" desc="" exp=""/>
-    <constraint field="path" desc="" exp=""/>
-    <constraint field="leimikko" desc="" exp=""/>
-    <constraint field="DTW_1" desc="" exp=""/>
-    <constraint field="euc_1" desc="" exp=""/>
-    <constraint field="DTW_1n" desc="" exp=""/>
-    <constraint field="dtree" desc="" exp=""/>
-    <constraint field="dtreen" desc="" exp=""/>
-    <constraint field="biod" desc="" exp=""/>
-    <constraint field="biodn" desc="" exp=""/>
-    <constraint field="pRetent" desc="" exp=""/>
-    <constraint field="pRetentn" desc="" exp=""/>
-    <constraint field="env_value" desc="" exp=""/>
-    <constraint field="HS_1" desc="" exp=""/>
-    <constraint field="reTree" desc="" exp=""/>
+    <constraint field="CHM" exp="" desc=""/>
+    <constraint field="SPECIALFEATURECODE" exp="" desc=""/>
+    <constraint field="SPECIALFEATUREADDITIONALCODE" exp="" desc=""/>
+    <constraint field="FERTILITYCLASS" exp="" desc=""/>
+    <constraint field="DEVELOPMENTCLASS" exp="" desc=""/>
+    <constraint field="STEMCOUNTPINE" exp="" desc=""/>
+    <constraint field="STEMCOUNTDECIDUOUS" exp="" desc=""/>
+    <constraint field="STEMCOUNTSPRUCE" exp="" desc=""/>
+    <constraint field="MEANDIAMETERDECIDUOUS" exp="" desc=""/>
+    <constraint field="MEANDIAMETERPINE" exp="" desc=""/>
+    <constraint field="MEANDIAMETERSPRUCE" exp="" desc=""/>
+    <constraint field="MEANHEIGHTDECIDUOUS" exp="" desc=""/>
+    <constraint field="MEANHEIGHTPINE" exp="" desc=""/>
+    <constraint field="MEANHEIGHTSPRUCE" exp="" desc=""/>
+    <constraint field="PaajakoNro" exp="" desc=""/>
+    <constraint field="Nimi" exp="" desc=""/>
+    <constraint field="Nimi_2" exp="" desc=""/>
+    <constraint field="layer" exp="" desc=""/>
+    <constraint field="path" exp="" desc=""/>
+    <constraint field="leimikko" exp="" desc=""/>
+    <constraint field="DTW_1" exp="" desc=""/>
+    <constraint field="euc_1" exp="" desc=""/>
+    <constraint field="DTW_1n" exp="" desc=""/>
+    <constraint field="biod" exp="" desc=""/>
+    <constraint field="biodn" exp="" desc=""/>
+    <constraint field="dtree" exp="" desc=""/>
+    <constraint field="dtreen" exp="" desc=""/>
+    <constraint field="pRetent" exp="" desc=""/>
+    <constraint field="pRetentn" exp="" desc=""/>
+    <constraint field="env_value" exp="" desc=""/>
+    <constraint field="HS_1" exp="" desc=""/>
+    <constraint field="reTree" exp="" desc=""/>
   </constraintExpressions>
   <expressionfields/>
   <attributeactions>
-    <defaultAction value="{00000000-0000-0000-0000-000000000000}" key="Canvas"/>
+    <defaultAction key="Canvas" value="{00000000-0000-0000-0000-000000000000}"/>
   </attributeactions>
-  <attributetableconfig actionWidgetStyle="dropDown" sortExpression="" sortOrder="0">
+  <attributetableconfig sortOrder="0" actionWidgetStyle="dropDown" sortExpression="">
     <columns>
-      <column type="field" hidden="0" width="-1" name="CHM"/>
-      <column type="field" hidden="0" width="-1" name="SPECIALFEATURECODE"/>
-      <column type="field" hidden="0" width="-1" name="SPECIALFEATUREADDITIONALCODE"/>
-      <column type="field" hidden="0" width="-1" name="FERTILITYCLASS"/>
-      <column type="field" hidden="0" width="-1" name="DEVELOPMENTCLASS"/>
-      <column type="field" hidden="0" width="-1" name="STEMCOUNTPINE"/>
-      <column type="field" hidden="0" width="-1" name="STEMCOUNTDECIDUOUS"/>
-      <column type="field" hidden="0" width="-1" name="STEMCOUNTSPRUCE"/>
-      <column type="field" hidden="0" width="-1" name="MEANDIAMETERDECIDUOUS"/>
-      <column type="field" hidden="0" width="-1" name="MEANDIAMETERPINE"/>
-      <column type="field" hidden="0" width="-1" name="MEANDIAMETERSPRUCE"/>
-      <column type="field" hidden="0" width="-1" name="MEANHEIGHTDECIDUOUS"/>
-      <column type="field" hidden="0" width="-1" name="MEANHEIGHTPINE"/>
-      <column type="field" hidden="0" width="-1" name="MEANHEIGHTSPRUCE"/>
-      <column type="field" hidden="0" width="-1" name="PaajakoNro"/>
-      <column type="field" hidden="0" width="-1" name="Nimi"/>
-      <column type="field" hidden="0" width="-1" name="OBJECTID"/>
-      <column type="field" hidden="0" width="-1" name="Nimi_2"/>
-      <column type="field" hidden="0" width="-1" name="layer"/>
-      <column type="field" hidden="0" width="-1" name="path"/>
-      <column type="field" hidden="0" width="-1" name="leimikko"/>
-      <column type="field" hidden="0" width="-1" name="DTW_1"/>
-      <column type="field" hidden="0" width="-1" name="euc_1"/>
-      <column type="field" hidden="0" width="-1" name="DTW_1n"/>
-      <column type="field" hidden="0" width="-1" name="dtree"/>
-      <column type="field" hidden="0" width="-1" name="dtreen"/>
-      <column type="field" hidden="0" width="-1" name="biod"/>
-      <column type="field" hidden="0" width="-1" name="biodn"/>
-      <column type="field" hidden="0" width="-1" name="pRetent"/>
-      <column type="field" hidden="0" width="-1" name="pRetentn"/>
-      <column type="field" hidden="0" width="-1" name="env_value"/>
-      <column type="field" hidden="0" width="-1" name="HS_1"/>
-      <column type="field" hidden="0" width="-1" name="reTree"/>
-      <column type="actions" hidden="1" width="-1"/>
+      <column width="-1" name="CHM" hidden="0" type="field"/>
+      <column width="-1" name="SPECIALFEATURECODE" hidden="0" type="field"/>
+      <column width="-1" name="SPECIALFEATUREADDITIONALCODE" hidden="0" type="field"/>
+      <column width="-1" name="FERTILITYCLASS" hidden="0" type="field"/>
+      <column width="-1" name="DEVELOPMENTCLASS" hidden="0" type="field"/>
+      <column width="-1" name="STEMCOUNTPINE" hidden="0" type="field"/>
+      <column width="-1" name="STEMCOUNTDECIDUOUS" hidden="0" type="field"/>
+      <column width="-1" name="STEMCOUNTSPRUCE" hidden="0" type="field"/>
+      <column width="-1" name="MEANDIAMETERDECIDUOUS" hidden="0" type="field"/>
+      <column width="-1" name="MEANDIAMETERPINE" hidden="0" type="field"/>
+      <column width="-1" name="MEANDIAMETERSPRUCE" hidden="0" type="field"/>
+      <column width="-1" name="MEANHEIGHTDECIDUOUS" hidden="0" type="field"/>
+      <column width="-1" name="MEANHEIGHTPINE" hidden="0" type="field"/>
+      <column width="-1" name="MEANHEIGHTSPRUCE" hidden="0" type="field"/>
+      <column width="-1" name="PaajakoNro" hidden="0" type="field"/>
+      <column width="-1" name="Nimi" hidden="0" type="field"/>
+      <column width="-1" name="Nimi_2" hidden="0" type="field"/>
+      <column width="-1" name="layer" hidden="0" type="field"/>
+      <column width="-1" name="path" hidden="0" type="field"/>
+      <column width="-1" name="leimikko" hidden="0" type="field"/>
+      <column width="-1" name="DTW_1" hidden="0" type="field"/>
+      <column width="-1" name="euc_1" hidden="0" type="field"/>
+      <column width="-1" name="DTW_1n" hidden="0" type="field"/>
+      <column width="-1" name="dtree" hidden="0" type="field"/>
+      <column width="-1" name="dtreen" hidden="0" type="field"/>
+      <column width="-1" name="biod" hidden="0" type="field"/>
+      <column width="-1" name="biodn" hidden="0" type="field"/>
+      <column width="-1" name="pRetent" hidden="0" type="field"/>
+      <column width="-1" name="pRetentn" hidden="0" type="field"/>
+      <column width="-1" name="env_value" hidden="0" type="field"/>
+      <column width="-1" name="HS_1" hidden="0" type="field"/>
+      <column width="-1" name="reTree" hidden="0" type="field"/>
+      <column width="-1" hidden="1" type="actions"/>
     </columns>
   </attributetableconfig>
   <conditionalstyles>
@@ -785,74 +821,74 @@ def my_form_open(dialog, layer, feature):
     <field name="reTree" editable="1"/>
   </editable>
   <labelOnTop>
-    <field labelOnTop="0" name="CHM"/>
-    <field labelOnTop="0" name="DEVELOPMENTCLASS"/>
-    <field labelOnTop="0" name="DTW_1"/>
-    <field labelOnTop="0" name="DTW_1n"/>
-    <field labelOnTop="0" name="FERTILITYCLASS"/>
-    <field labelOnTop="0" name="HS_1"/>
-    <field labelOnTop="0" name="MEANDIAMETERDECIDUOUS"/>
-    <field labelOnTop="0" name="MEANDIAMETERPINE"/>
-    <field labelOnTop="0" name="MEANDIAMETERSPRUCE"/>
-    <field labelOnTop="0" name="MEANHEIGHTDECIDUOUS"/>
-    <field labelOnTop="0" name="MEANHEIGHTPINE"/>
-    <field labelOnTop="0" name="MEANHEIGHTSPRUCE"/>
-    <field labelOnTop="0" name="Nimi"/>
-    <field labelOnTop="0" name="Nimi_2"/>
-    <field labelOnTop="0" name="OBJECTID"/>
-    <field labelOnTop="0" name="PaajakoNro"/>
-    <field labelOnTop="0" name="SPECIALFEATUREADDITIONALCODE"/>
-    <field labelOnTop="0" name="SPECIALFEATURECODE"/>
-    <field labelOnTop="0" name="STEMCOUNTDECIDUOUS"/>
-    <field labelOnTop="0" name="STEMCOUNTPINE"/>
-    <field labelOnTop="0" name="STEMCOUNTSPRUCE"/>
-    <field labelOnTop="0" name="biod"/>
-    <field labelOnTop="0" name="biodn"/>
-    <field labelOnTop="0" name="dtree"/>
-    <field labelOnTop="0" name="dtreen"/>
-    <field labelOnTop="0" name="env_value"/>
-    <field labelOnTop="0" name="euc_1"/>
-    <field labelOnTop="0" name="layer"/>
-    <field labelOnTop="0" name="leimikko"/>
-    <field labelOnTop="0" name="pRetent"/>
-    <field labelOnTop="0" name="pRetentn"/>
-    <field labelOnTop="0" name="path"/>
-    <field labelOnTop="0" name="reTree"/>
+    <field name="CHM" labelOnTop="0"/>
+    <field name="DEVELOPMENTCLASS" labelOnTop="0"/>
+    <field name="DTW_1" labelOnTop="0"/>
+    <field name="DTW_1n" labelOnTop="0"/>
+    <field name="FERTILITYCLASS" labelOnTop="0"/>
+    <field name="HS_1" labelOnTop="0"/>
+    <field name="MEANDIAMETERDECIDUOUS" labelOnTop="0"/>
+    <field name="MEANDIAMETERPINE" labelOnTop="0"/>
+    <field name="MEANDIAMETERSPRUCE" labelOnTop="0"/>
+    <field name="MEANHEIGHTDECIDUOUS" labelOnTop="0"/>
+    <field name="MEANHEIGHTPINE" labelOnTop="0"/>
+    <field name="MEANHEIGHTSPRUCE" labelOnTop="0"/>
+    <field name="Nimi" labelOnTop="0"/>
+    <field name="Nimi_2" labelOnTop="0"/>
+    <field name="OBJECTID" labelOnTop="0"/>
+    <field name="PaajakoNro" labelOnTop="0"/>
+    <field name="SPECIALFEATUREADDITIONALCODE" labelOnTop="0"/>
+    <field name="SPECIALFEATURECODE" labelOnTop="0"/>
+    <field name="STEMCOUNTDECIDUOUS" labelOnTop="0"/>
+    <field name="STEMCOUNTPINE" labelOnTop="0"/>
+    <field name="STEMCOUNTSPRUCE" labelOnTop="0"/>
+    <field name="biod" labelOnTop="0"/>
+    <field name="biodn" labelOnTop="0"/>
+    <field name="dtree" labelOnTop="0"/>
+    <field name="dtreen" labelOnTop="0"/>
+    <field name="env_value" labelOnTop="0"/>
+    <field name="euc_1" labelOnTop="0"/>
+    <field name="layer" labelOnTop="0"/>
+    <field name="leimikko" labelOnTop="0"/>
+    <field name="pRetent" labelOnTop="0"/>
+    <field name="pRetentn" labelOnTop="0"/>
+    <field name="path" labelOnTop="0"/>
+    <field name="reTree" labelOnTop="0"/>
   </labelOnTop>
   <reuseLastValue>
-    <field reuseLastValue="0" name="CHM"/>
-    <field reuseLastValue="0" name="DEVELOPMENTCLASS"/>
-    <field reuseLastValue="0" name="DTW_1"/>
-    <field reuseLastValue="0" name="DTW_1n"/>
-    <field reuseLastValue="0" name="FERTILITYCLASS"/>
-    <field reuseLastValue="0" name="HS_1"/>
-    <field reuseLastValue="0" name="MEANDIAMETERDECIDUOUS"/>
-    <field reuseLastValue="0" name="MEANDIAMETERPINE"/>
-    <field reuseLastValue="0" name="MEANDIAMETERSPRUCE"/>
-    <field reuseLastValue="0" name="MEANHEIGHTDECIDUOUS"/>
-    <field reuseLastValue="0" name="MEANHEIGHTPINE"/>
-    <field reuseLastValue="0" name="MEANHEIGHTSPRUCE"/>
-    <field reuseLastValue="0" name="Nimi"/>
-    <field reuseLastValue="0" name="Nimi_2"/>
-    <field reuseLastValue="0" name="OBJECTID"/>
-    <field reuseLastValue="0" name="PaajakoNro"/>
-    <field reuseLastValue="0" name="SPECIALFEATUREADDITIONALCODE"/>
-    <field reuseLastValue="0" name="SPECIALFEATURECODE"/>
-    <field reuseLastValue="0" name="STEMCOUNTDECIDUOUS"/>
-    <field reuseLastValue="0" name="STEMCOUNTPINE"/>
-    <field reuseLastValue="0" name="STEMCOUNTSPRUCE"/>
-    <field reuseLastValue="0" name="biod"/>
-    <field reuseLastValue="0" name="biodn"/>
-    <field reuseLastValue="0" name="dtree"/>
-    <field reuseLastValue="0" name="dtreen"/>
-    <field reuseLastValue="0" name="env_value"/>
-    <field reuseLastValue="0" name="euc_1"/>
-    <field reuseLastValue="0" name="layer"/>
-    <field reuseLastValue="0" name="leimikko"/>
-    <field reuseLastValue="0" name="pRetent"/>
-    <field reuseLastValue="0" name="pRetentn"/>
-    <field reuseLastValue="0" name="path"/>
-    <field reuseLastValue="0" name="reTree"/>
+    <field name="CHM" reuseLastValue="0"/>
+    <field name="DEVELOPMENTCLASS" reuseLastValue="0"/>
+    <field name="DTW_1" reuseLastValue="0"/>
+    <field name="DTW_1n" reuseLastValue="0"/>
+    <field name="FERTILITYCLASS" reuseLastValue="0"/>
+    <field name="HS_1" reuseLastValue="0"/>
+    <field name="MEANDIAMETERDECIDUOUS" reuseLastValue="0"/>
+    <field name="MEANDIAMETERPINE" reuseLastValue="0"/>
+    <field name="MEANDIAMETERSPRUCE" reuseLastValue="0"/>
+    <field name="MEANHEIGHTDECIDUOUS" reuseLastValue="0"/>
+    <field name="MEANHEIGHTPINE" reuseLastValue="0"/>
+    <field name="MEANHEIGHTSPRUCE" reuseLastValue="0"/>
+    <field name="Nimi" reuseLastValue="0"/>
+    <field name="Nimi_2" reuseLastValue="0"/>
+    <field name="OBJECTID" reuseLastValue="0"/>
+    <field name="PaajakoNro" reuseLastValue="0"/>
+    <field name="SPECIALFEATUREADDITIONALCODE" reuseLastValue="0"/>
+    <field name="SPECIALFEATURECODE" reuseLastValue="0"/>
+    <field name="STEMCOUNTDECIDUOUS" reuseLastValue="0"/>
+    <field name="STEMCOUNTPINE" reuseLastValue="0"/>
+    <field name="STEMCOUNTSPRUCE" reuseLastValue="0"/>
+    <field name="biod" reuseLastValue="0"/>
+    <field name="biodn" reuseLastValue="0"/>
+    <field name="dtree" reuseLastValue="0"/>
+    <field name="dtreen" reuseLastValue="0"/>
+    <field name="env_value" reuseLastValue="0"/>
+    <field name="euc_1" reuseLastValue="0"/>
+    <field name="layer" reuseLastValue="0"/>
+    <field name="leimikko" reuseLastValue="0"/>
+    <field name="pRetent" reuseLastValue="0"/>
+    <field name="pRetentn" reuseLastValue="0"/>
+    <field name="path" reuseLastValue="0"/>
+    <field name="reTree" reuseLastValue="0"/>
   </reuseLastValue>
   <dataDefinedFieldProperties/>
   <widgets/>

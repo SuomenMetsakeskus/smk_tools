@@ -38,8 +38,8 @@ class Valumamalli(QgsProcessingAlgorithm):
     #jako5 = iface.addVectorLayer(jako5l)
     def initAlgorithm(self, config=None):
         self.addParameter(QgsProcessingParameterNumber('tartunta', 'Tartuntaetäisyys', type=QgsProcessingParameterNumber.Integer, minValue=0, maxValue=20, defaultValue=5))
-        self.addParameter(QgsProcessingParameterPoint('tt', 'purkupiste', defaultValue='0.000000,0.000000'))
-        self.addParameter(QgsProcessingParameterVectorDestination('Valuma', 'Valuma',type=QgsProcessing.TypeVectorAnyGeometry,createByDefault=True, defaultValue=None))
+        self.addParameter(QgsProcessingParameterPoint('purkupiste', 'purkupiste', defaultValue='0.000000,0.000000'))
+        self.addParameter(QgsProcessingParameterFeatureSink('Valuma-alue', 'Valuma-alue'))
         #self.addParameter(QgsProcessingParameterRasterDestination('Outrast', 'outrast', createByDefault=True, defaultValue=None))
 
     def processAlgorithm(self, parameters, context, model_feedback):
@@ -51,7 +51,7 @@ class Valumamalli(QgsProcessingAlgorithm):
 
         # Luo taso pisteestä
         alg_params = {
-            'INPUT': parameters['tt'],
+            'INPUT': parameters['purkupiste'],
             'OUTPUT': "TEMPORARY_OUTPUT"
         }
         outputs['LuoTasoPisteest'] = processing.run('native:pointtolayer', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
@@ -69,11 +69,11 @@ class Valumamalli(QgsProcessingAlgorithm):
                             'METHOD':1,
                             'DISCARD_NONMATCHING':True,
                             'PREFIX':'',
-                            'OUTPUT':QgsProcessing.TEMPORARY_OUTPUT},context=context, feedback=feedback, is_child_algorithm=True)
+                            'OUTPUT':'TEMPORARY_OUTPUT'},context=context, feedback=feedback, is_child_algorithm=False)
 
         jako5_raj = jako5_raj['OUTPUT']
         #feedback.pushInfo("jotain: "+jako5_raj)
-        #feedback.pushInfo(coords = "%f,%f,%f,%f" %(jako5_raj.extent().xMinimum(), jako5_raj.extent().xMaximum(), jako5_raj.extent().yMinimum(), jako5_raj.extent().yMaximum()))
+        #feedback.pushInfo("coords = %f,%f,%f,%f" %(jako5_raj.extent().xMinimum(), jako5_raj.extent().xMaximum(), jako5_raj.extent().yMinimum(), jako5_raj.extent().yMaximum()))
         feedback.setCurrentStep(2)
         if feedback.isCanceled():
             return {}
@@ -86,21 +86,25 @@ class Valumamalli(QgsProcessingAlgorithm):
                             'JOIN_STYLE':0,
                             'MITER_LIMIT':2,
                             'DISSOLVE':True,
-                            'OUTPUT':QgsProcessing.TEMPORARY_OUTPUT},context=context, feedback=feedback)
+                            'OUTPUT':'TEMPORARY_OUTPUT'},context=context, feedback=feedback,is_child_algorithm=False)
         
         #results['Valuma'] = parameters['Valuma']
 
         jako5_raj = jako5_raj['OUTPUT']
         jako5_raj.updateExtents()
-
+        
+        #feedback.pushInfo(str(jako5_raj.extent()))
         feedback.setCurrentStep(3)
         if feedback.isCanceled():
             return {}
+        #layer = QgsProcessingUtils.mapLayerFromString(jako5_raj, context)
+        D8= getWebRasterLayer(jako5_raj,self.D8url,"")
+        feedback.pushInfo(D8[1])
         
         DEM = getWebRasterLayer(jako5_raj,self.DEMurl,"")
         feedback.pushInfo(DEM[1])
-        D8= getWebRasterLayer(jako5_raj,self.D8url,"")
-        feedback.pushInfo(D8[1])
+        
+        
 
         d8_raj = processing.run("grass7:r.reclass",
                         {'input':D8[0],
@@ -149,18 +153,27 @@ class Valumamalli(QgsProcessingAlgorithm):
         
         dataset = {'pinta_ala':30.1}
         df = pd.DataFrame(dataset,index=[0])
-        vect = raster2vector2(basin["output"],df)
+        out = raster2vector2(basin["output"],df)
         
         style = os.path.join(os.path.dirname(__file__),"valumaalue_style.qml")
         feedback.pushInfo(str(style))
         #layer = QgsVectorLayer(vect.source(),'Valuma-alue','ogr')
         
-        outputs['Valuma'] = processing.run("saga:copyfeatures", {'SHAPES':vect.source(),'COPY':parameters['Valuma']},context=context, feedback=feedback,is_child_algorithm=True)
+        #outputs['Valuma'] = processing.run("saga:copyfeatures", {'SHAPES':vect.source(),'COPY':parameters['Valuma']},context=context, feedback=feedback,is_child_algorithm=True)
         #outputs['Valuma']['COPY']
-        results['Valuma'] = outputs['Valuma']['COPY']
-        outputs['style'] = processing.run("native:setlayerstyle", {'INPUT':outputs['Valuma']['COPY'],'STYLE':style},context=context, feedback=feedback, is_child_algorithm=True)
-        
-        return results
+        #out = QgsVectorLayer(outputs['Valuma']['COPY'],"Valuma","ogr")
+        #outputs['style'] = processing.run("native:setlayerstyle", {'INPUT':outputs['Valuma']['COPY'],'STYLE':style},context=context, feedback=feedback, is_child_algorithm=True)
+        (sink, dest_id) = self.parameterAsSink(parameters,'Valuma-alue',context,
+                    out.fields(), out.wkbType(), out.crs())
+            #feedback.pushInfo(str(out.fields().names()))
+        outFeats = out.getFeatures()
+        for outFeat in outFeats:
+            #feedback.pushInfo(str(outFeat['CHM']))
+            sink.addFeature(outFeat, QgsFeatureSink.FastInsert)
+
+        layer = QgsProcessingUtils.mapLayerFromString(dest_id, context)
+        layer.loadNamedStyle(style)
+        return {'Valuma-alue': dest_id}
     
     def name(self):
         """
@@ -170,7 +183,7 @@ class Valumamalli(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Luo valuma-alue'
+        return 'Laske valuma-alue'
 
     def icon(self):
         

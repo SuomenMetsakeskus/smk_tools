@@ -9,6 +9,7 @@ from qgis import processing
 from qgis.core import QgsVectorLayer,QgsField,QgsFeature,edit,QgsApplication
 from qgis.analysis import QgsInterpolator,QgsIDWInterpolator,QgsGridFileWriter
 
+"""
 #for developing
 QgsApplication.setPrefixPath(QgsApplication.prefixPath(), True)
 qgs = QgsApplication([], False)
@@ -22,7 +23,7 @@ Processing.initialize()
 #Processing.initialize()
 #import processing
 from qgis.analysis import QgsNativeAlgorithms
-
+"""
 
 
 def feature2Layer(feat,buffer):
@@ -55,7 +56,7 @@ def copyRaster2(inp,outp):
     os.popen('copy '+inp+' '+outp)
 
 
-def focalMaximaCHM(input_raster,distance):
+def focalMaximaCHM(input_raster,distance,convert):
     """
     This calculates focal maximum value by specific search distance
     """
@@ -65,7 +66,8 @@ def focalMaximaCHM(input_raster,distance):
     
     chmB = chm.GetRasterBand(1)
     chmA = chmB.ReadAsArray()
-    chmA = (chmA-126)*0.232 #vaihe 1
+    if convert == True:
+        chmA = (chmA-126)*0.232 #vaihe 1
 
     focal = calcFocal(chmA,distance) #vaihe 2
     huip = focal - chmA
@@ -118,13 +120,13 @@ def delNulls(input_vector):
     input_vector.dataProvider().deleteFeatures(dfeat)
 
 
-def createTreeMap(input_chm,distance):
+def createTreeMap(input_chm,distance,convert):
     """
     This creates tree map as point layer from chm raster. Algorithm is based on local maxima at specific search distance
     """
     #tempd = tempfile.TemporaryFile()
     #tempd = tempd.name+'.shp'
-    focalMax = focalMaximaCHM(input_chm,distance)
+    focalMax = focalMaximaCHM(input_chm,distance,convert)
     tempd = processing.run("gdal:polygonize", {'INPUT':focalMax,'BAND':1,'FIELD':'CHM','EIGHT_CONNECTEDNESS':False,'EXTRA':'','OUTPUT':'TEMPORARY_OUTPUT'})
     
     delNulls(tempd['OUTPUT'])

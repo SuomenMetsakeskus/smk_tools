@@ -93,7 +93,7 @@ def raster2vector2(in_rast,data):
                 c = 1
             else:
                 vect.deleteFeature(feat.id())
-        vect.commitChanges()
+            vect.updateFeature(feat)
     return vect
 
 def cleanGeom(vector):

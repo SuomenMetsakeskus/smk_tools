@@ -1,7 +1,7 @@
 import requests,tempfile,json
 from math import sqrt,pow
 from qgis.PyQt.QtCore import QVariant
-from qgis.core import QgsVectorLayer,QgsField,QgsFeature
+from qgis.core import QgsVectorLayer,QgsField,QgsFeature,QgsProcessingFeedback
 from osgeo import gdal
 import numpy as np
 from qgis import processing
@@ -169,8 +169,8 @@ def getWebRasterLayer(input_polygon:QgsVectorLayer,url:str,name:str):
         else:
             open(tempd,'wb').write(respo.content)
     
-    except:
-        info = "Cannot connect to data: "+str(url)
+    except Exception as e:
+        info = str(e)
         infolevel = 3
     
         
@@ -185,8 +185,8 @@ def getWebRasterLayer(input_polygon:QgsVectorLayer,url:str,name:str):
         else:
            info = "Not able find data from area"
            infolevel = 3
-    except:
-        info = "Not able find data from area"
+    except Exception as e:
+        info = str(e)
         infolevel = 3
 
     return tempd,info,infolevel

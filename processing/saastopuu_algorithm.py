@@ -45,10 +45,11 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingUtils)
 import os,time,sys
 sys.path.append(os.path.dirname(__file__))
-from PIL import Image
+#from PIL import Image
 from getInput import getWebRasterLayer,getWebVectorLayer,getProtectedSites
 from smk_geotools import feature2Layer,createTreeMap,addFieldValue,joinIntersection
-from saastopuu import *
+from smk_essmodels import runEssModel
+#from saastopuu import *
 pluginPath = os.path.abspath(
     os.path.join(
         os.path.dirname(__file__),
@@ -69,7 +70,7 @@ class saastopuu_toolsAlgorithm(QgsProcessingAlgorithm):
     PUUM = 'PUUM'
     INPUT = 'INPUT'
 
-    chm_data = 'https://rajapinnat.metsaan.fi/geoserver/Avoinmetsatieto/CHM_newest/ows?'
+    chm_data = 'https://avoin.metsakeskus.fi/rajapinnat/v1/CHM_newest/ows?'
     grid_data = 'https://avoin.metsakeskus.fi/rajapinnat/v1/gridcell/ows?'
     stand_data = 'https://avoin.metsakeskus.fi/rajapinnat/v1/stand/ows?'
     dtw_data = 'https://paituli.csc.fi/geoserver/paituli/wcs?'
@@ -244,7 +245,7 @@ class saastopuu_toolsAlgorithm(QgsProcessingAlgorithm):
             feedback.setProgressText("vektoroidaan puukartta")
             feedback.setProgress(30)
             
-            outChm = createTreeMap(chm[0],3)
+            outChm = createTreeMap(chm[0],3,True)
 
             feedback.setProgress(40)
 
@@ -275,16 +276,6 @@ class saastopuu_toolsAlgorithm(QgsProcessingAlgorithm):
             feedback.setProgressText("Lasketaan ympäristötekijöiden arvot")
             feedback.setProgress(60)
             
-            
-            normalizeValue(outChm,'DTW_1')
-            normalizeValue(outChm,'euc_1')
-            
-            calculateDecayTreePotential(outChm)
-            calculateBiodiversity(outChm)
-            
-            calculateNPretention(outChm)
-
-            feedback.setProgress(70)
 
             fosf = self.parameterAsInt(parameters,self.FOSFORI,context)
             dtw = self.parameterAsInt(parameters,self.DTW,context)
@@ -293,12 +284,10 @@ class saastopuu_toolsAlgorithm(QgsProcessingAlgorithm):
             weights ={"NP":float(fosf),"BIO":float(biod),"LP":float(lahop),"DTW":float(dtw)}
             puuMaara = self.parameterAsInt(parameters,self.PUUM,context)
             
-            calculateEnvValue(outChm,weights)
-            outChm = hsAnalysis(outChm,'env_value')
+            out = runEssModel(outChm,weights,puuMaara,leimArea[0],'PaajakoNro')
+            #calculateEnvValue(outChm,weights)
 
             feedback.setProgressText("koko: "+str(round(leimArea[0],2))+"\ns-puiden määrä: "+str(int(puuMaara*leimArea[0])))
-            
-            out = optimizeRetentioTrees(outChm['OUTPUT'],leimArea[0],puuMaara)
             
             idx=[]
             idx.append(out.fields().indexFromName('fid'))
@@ -328,7 +317,7 @@ class saastopuu_toolsAlgorithm(QgsProcessingAlgorithm):
                 sink.addFeature(outFeat, QgsFeatureSink.FastInsert)
         
             layer = QgsProcessingUtils.mapLayerFromString(dest_id, context)
-        
+            """
             if str((layer.dataProvider().dataSourceUri())).startswith("memory?") == True:
                 graafi = ""
             else:
@@ -339,7 +328,7 @@ class saastopuu_toolsAlgorithm(QgsProcessingAlgorithm):
             #feedback.pushInfo("test: "+str(te))
             graafi = makeRetentionGraph(out,graafi)
             g = Image.open(graafi)
-            g.show()
+            g.show()"""
             #sink.setName("Säästöpuut")
             
 
