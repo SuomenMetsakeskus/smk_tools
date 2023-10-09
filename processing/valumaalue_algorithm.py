@@ -22,7 +22,7 @@ from qgis.core import (QgsProcessing,
                        QgsFeatureRequest)
 
 from getInput import getWebRasterLayer
-from getInput import getWater
+#from getInput import getWater
 from fcFunctions import raster2vector2
 
 pluginPath = os.path.abspath(
@@ -32,8 +32,8 @@ pluginPath = os.path.abspath(
 
 class Valumamalli(QgsProcessingAlgorithm):
     jako5 = QgsVectorLayer("crs='EPSG:3067' url='https://aineistot.metsakeskus.fi/metsakeskus/rest/services/Luontotieto/Valumaalueet_t5/MapServer/0' http-header:referer=''","jako5","arcgisfeatureserver")
-    DEMurl = "https://aineistot.metsakeskus.fi/metsakeskus/rest/services/Vesiensuojelu/DEM/ImageServer"
-    D8url = "https://aineistot.metsakeskus.fi/metsakeskus/rest/services/Vesiensuojelu/D8_suomi/ImageServer"
+    DEMurl = 'https://aineistot.metsakeskus.fi/metsakeskus/rest/services/Vesiensuojelu/DEM/ImageServer'
+    D8url = 'https://aineistot.metsakeskus.fi/metsakeskus/rest/services/Vesiensuojelu/D8_suomi/ImageServer'
 
     #jako5 = iface.addVectorLayer(jako5l)
     def initAlgorithm(self, config=None):

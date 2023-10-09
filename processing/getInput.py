@@ -1,10 +1,10 @@
 import requests,tempfile,json
 from math import sqrt,pow
 from qgis.PyQt.QtCore import QVariant
-from qgis.core import QgsVectorLayer,QgsField,QgsFeature,QgsProcessingFeedback
+from qgis.core import QgsVectorLayer,QgsField,QgsFeature
 from osgeo import gdal
 import numpy as np
-from qgis import processing
+#from qgis import processing
 
 
 def getBboxWmsFormat(in_feat:QgsVectorLayer):
