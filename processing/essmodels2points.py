@@ -49,12 +49,15 @@ sys.path.append(os.path.dirname(__file__))
 #from PIL import Image
 from getInput import getWebRasterLayer,getWebVectorLayer,getProtectedSites
 from smk_geotools import feature2Layer,createTreeMap,addFieldValue,joinIntersection
-from smk_essmodels import runEssModel
+from smk_essmodels import runEssModel2points
+
 #from saastopuu import *
+#sys.path.append(os.path.dirname(__file__))
 pluginPath = os.path.abspath(
     os.path.join(
         os.path.dirname(__file__),
         os.pardir))
+
 
 class essmodels2points(QgsProcessingAlgorithm):
 
@@ -83,7 +86,7 @@ class essmodels2points(QgsProcessingAlgorithm):
     mkasviv_name = 'eliogeoalue'
 
     stand_fields = 'SPECIALFEATURECODE,SPECIALFEATUREADDITIONALCODE,GEOMETRY'
-    grid_fields = 'GEOMETRY,FERTILITYCLASS,DEVELOPMENTCLASS,STEMCOUNTPINE,STEMCOUNTDECIDUOUS,STEMCOUNTSPRUCE,MEANDIAMETERDECIDUOUS,MEANDIAMETERPINE,MEANDIAMETERSPRUCE,MEANHEIGHTDECIDUOUS,MEANHEIGHTPINE,MEANHEIGHTSPRUCE'
+    grid_fields = 'GEOMETRY,FERTILITYCLASS,STEMCOUNTPINE,STEMCOUNTDECIDUOUS,STEMCOUNTSPRUCE,MEANDIAMETERDECIDUOUS,MEANDIAMETERPINE,MEANDIAMETERSPRUCE'
     mkasviv_fields = 'PaajakoNro,Nimi'
 
     def initAlgorithm(self, config):
@@ -96,11 +99,11 @@ class essmodels2points(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterField('species', 'species', type=QgsProcessingParameterField.Numeric, parentLayerParameterName='points', allowMultiple=False, defaultValue='species'))
         # We add the input vector features source. It can have any kind of
         # geometry.
-        self.addParameter(QgsProcessingParameterFeatureSource('cutting', 'cutting', types=[QgsProcessing.TypeVectorPolygon], defaultValue=None))
+        #self.addParameter(QgsProcessingParameterFeatureSource('cutting', 'cutting', types=[QgsProcessing.TypeVectorPolygon], defaultValue=None))
        
         
 
-        self.addParameter(QgsProcessingParameterBoolean('hotspot', 'calculate hotspot', defaultValue=True))
+        #self.addParameter(QgsProcessingParameterBoolean('hotspot', 'calculate hotspot', defaultValue=True))
         #self.addParameter(QgsProcessingParameterRasterDestination('LeikattuLatvus', 'leikattu latvus', createByDefault=True, defaultValue=None))
         #self.addParameter(QgsProcessingParameterFeatureSink('LeikattuHila', 'Leikattu hila', type=QgsProcessing.TypeVectorAnyGeometry, createByDefault=True, defaultValue=None))
         params = []
@@ -146,14 +149,6 @@ class essmodels2points(QgsProcessingAlgorithm):
             p.setFlags(p.flags() | QgsProcessingParameterDefinition.FlagAdvanced) 
             self.addParameter(p)
 
-        self.addParameter(
-            QgsProcessingParameterNumber(
-                self.PUUM,
-                self.tr('Säästöpuiden määrä (kpl /ha)'),
-                type=QgsProcessingParameterNumber.Integer,
-                minValue=5,maxValue=30,defaultValue=10
-            )
-            )
 
         # We add a feature sink in which to store our processed features (this
         # usually takes the form of a newly created vector layer when the
@@ -174,19 +169,23 @@ class essmodels2points(QgsProcessingAlgorithm):
             # Retrieve the feature source and sink. The 'dest_id' variable is used
             # to uniquely identify the feature sink, and must be included in the
             # dictionary returned by the processAlgorithm function.
-            source = self.parameterAsSource(parameters, self.INPUT, context)
+            alg_params = {'DISSOLVE':True,'DISTANCE': 50,'END_CAP_STYLE': 0,'INPUT': parameters['pisteet'],'JOIN_STYLE': 0,'MITER_LIMIT': 1,'SEGMENTS': 5,'OUTPUT':'TEMPORARY_OUTPUT'}
+            source = processing.run('native:buffer', alg_params, context=context, feedback=feedback, is_child_algorithm=False)['OUTPUT']
 
-            if parameters['hotspot']==True:
-                features = source.getFeatures()
+            #if parameters['hotspot']==True:
+            features = source.getFeatures()
+            for current, feature in enumerate(features):
+                if feedback.isCanceled():
+                    break
+            
+                feedback.setProgressText("Haetaan aineistot rajapinnasta")
+
+                #leimFeat = feature.getFeatures()
+                out = feature2Layer(feature,100)
+                #out1 = feature2Layer(feature,0)
+                out.setCrs(source.crs())
+                #out1.setCrs(source.crs())
                 
-                chm = getWebRasterLayer(out,self.chm_data,"")
-                feedb[chm[2]](chm[1])
-                stand = getWebVectorLayer(out,self.stand_data,self.stand_name,self.stand_fields)
-                feedb[stand[2]](stand[1])
-
-                fgrid = getWebVectorLayer(out,self.grid_data,self.gname,self.grid_fields)
-                feedb[fgrid[2]](fgrid[1])
-
                 dtw = getWebRasterLayer(out,self.dtw_data,self.dtw_name)
                 feedb[dtw[2]](dtw[1])
 
@@ -195,4 +194,93 @@ class essmodels2points(QgsProcessingAlgorithm):
 
                 euc = getWebRasterLayer(out,self.euc_data,"")
                 feedb[euc[2]](euc[1])
-    
+
+                fgrid = getWebVectorLayer(out,self.grid_data,self.gname,self.grid_fields)
+                feedb[fgrid[2]](fgrid[1])
+
+                points = parameters['points']
+                points = joinIntersection(outChm,fgrid[0],list(self.grid_fields.split(",")))
+                points = joinIntersection(outChm,biogeo[0],[])
+
+                if dtw[2]==1:
+                    outChm = processing.run("native:rastersampling", {'INPUT':outChm,'RASTERCOPY':dtw[0],'COLUMN_PREFIX':'DTW_','OUTPUT':'TEMPORARY_OUTPUT'})
+                    outChm = outChm['OUTPUT']
+                else:
+                    outChm.dataProvider().addAttributes([QgsField("DTW_1",QVariant.Double)])
+                    outChm.updateFields()
+                    
+                if euc[2]==1:
+                    outChm = processing.run("native:rastersampling", {'INPUT':outChm,'RASTERCOPY':euc[0],'COLUMN_PREFIX':'euc_','OUTPUT':'TEMPORARY_OUTPUT'})
+                    outChm = outChm['OUTPUT']
+                else:
+                    outChm.dataProvider().addAttributes([QgsField("euc_1",QVariant.Double)])
+                    outChm.updateFields()
+
+                feedback.setProgressText("Lasketaan ympäristötekijöiden arvot")
+                feedback.setProgress(60)
+            
+
+                fosf = self.parameterAsInt(parameters,self.FOSFORI,context)
+                dtw = self.parameterAsInt(parameters,self.DTW,context)
+                biod = self.parameterAsInt(parameters,self.BIOD,context)
+                lahop = self.parameterAsInt(parameters,self.LAHOP,context)
+
+                weights ={"NP":float(fosf),"BIO":float(biod),"LP":float(lahop),"DTW":float(dtw)}
+                #runEssModel2points
+                feedback.pushInfo(str(parameters['diameter']))
+                if current == 0:
+                    (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,context,
+                    out.fields(), out.wkbType(), out.crs())
+                #feedback.pushInfo(str(out.fields().names()))
+                outFeats = out.getFeatures()
+                for outFeat in outFeats:
+                    #feedback.pushInfo(str(outFeat['CHM']))
+                    sink.addFeature(outFeat, QgsFeatureSink.FastInsert)
+            
+                layer = QgsProcessingUtils.mapLayerFromString(dest_id, context)
+
+            return {self.OUTPUT: dest_id}
+
+    def name(self):
+        """
+        Returns the algorithm name, used for identifying the algorithm. This
+        string should be fixed for the algorithm, and must not be localised.
+        The name should be unique within each provider. Names should contain
+        lowercase alphanumeric characters only and no spaces or other
+        formatting characters.
+        """
+        return 'Laske ekosysteemipalveluarvot'
+
+    def icon(self):
+        
+        return QIcon(os.path.join(pluginPath, 'icon.jpg'))
+
+    def displayName(self):
+        """
+        Returns the translated algorithm name, which should be used for any
+        user-visible display of the algorithm name.
+        """
+        return self.tr(self.name())
+
+    def group(self):
+        """
+        Returns the name of the group this algorithm belongs to. This string
+        should be localised.
+        """
+        return self.tr(self.groupId())
+
+    def groupId(self):
+        """
+        Returns the unique ID of the group this algorithm belongs to. This
+        string should be fixed for the algorithm, and must not be localised.
+        The group id should be unique within each provider. Group id should
+        contain lowercase alphanumeric characters only and no spaces or other
+        formatting characters.
+        """
+        return 'SMK luontotieto'
+
+    def tr(self, string):
+        return QCoreApplication.translate('Processing', string)
+
+    def createInstance(self):
+        return essmodels2points()

@@ -120,6 +120,38 @@ def calculateDecayTreePotential(in_feat,fz_field):
     
     normalizeValue(in_feat,"dtree",None,False)
 
+def decay2tree(in_feat:QgsVectorLayer,diameter:str,fertilityclass:str,treespecies:str,biogeoclass:str):
+    """
+    This calcultes decaytree value for single tree. Input layer is in qgsvectorlayer format and other parameteres are fieldnames.
+    """
+    in_feat.dataProvider().addAttributes([QgsField("dtree",QVariant.Double)])
+    in_feat.updateFields()
+    
+
+    with edit(in_feat):
+        for feat in in_feat.getFeatures():
+
+            dcp = decay_tree_potential('zone'+str(feat[biogeoclass]))
+
+            if feat[fertilityclass] > 0 and feat[diameter] >0 and feat[treespecies] > 0:
+                if feat[fertilityclass]>6:
+                    para = dcp[6][feat[treespecies]]
+                else:
+                    para = dcp[feat[fertilityclass]][feat[treespecies]]
+                                    
+                potvalues = limit(np.poly1d(para)(feat[diameter]),0,2)
+                
+            else:
+                potvalues=0
+            
+            feat["dtree"]=float(potvalues)
+            
+            
+            in_feat.updateFeature(feat)
+    
+    normalizeValue(in_feat,"dtree",None,False)
+
+
 def calculateNPretention(in_feat):
     in_feat.dataProvider().addAttributes([QgsField("pRetent",QVariant.Double)])
     in_feat.updateFields()
@@ -182,3 +214,12 @@ def runEssModel(in_feat:QgsVectorLayer,weights,treecount,cuttingsize,fz_field):
     selectReTrees(retrees,'HS_1','leimikko',treecount,cuttingsize)
 
     return retrees
+
+def runEssModel2points(in_feat:QgsVectorLayer,trees_field,d_field,weights):
+    normalizeValue(in_feat,"DTW_1",(0.0,0.8),True)
+    calculateBiodiversity(in_feat,["STEMCOUNTPINE","STEMCOUNTDECIDUOUS","STEMCOUNTSPRUCE"])
+    #calculateDecayTreePotential(in_feat)
+    decay2tree(in_feat,d_field,'FERTILITYCLASS',trees_field,'PaajakoNro')
+    calculateNPretention(in_feat)
+    #weights ={"NP":float(1),"BIO":float(1),"LP":float(1),"DTW":float(1)}
+    calculateEnvValue(in_feat,weights)
