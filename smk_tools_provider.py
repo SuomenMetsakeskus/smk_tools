@@ -44,6 +44,7 @@ from .processing.suojakaista_algorithm import suojakaista_toolsAlgorithm
 from .processing.suojakaista_algorithm_wbt import suojakaista_toolsAlgorithm_wbt
 from .processing.valumaalue_algorithm import Valumamalli
 from .processing.saaastopuu_algorithm_qgisdata import saastopuu_toolsAlgorithm_qgis
+from .processing.essmodels2points import essmodels2points
 
 
 class smk_toolsProvider(QgsProcessingProvider):
@@ -78,6 +79,7 @@ class smk_toolsProvider(QgsProcessingProvider):
         self.addAlgorithm(saastopuu_toolsAlgorithm())
         self.addAlgorithm(saastopuu_toolsAlgorithm_qgis())
         self.addAlgorithm(Valumamalli())
+        self.addAlgorithm(essmodels2points())
         #self.addAlgorithm(focal_toolsAlgorithm())
         
         

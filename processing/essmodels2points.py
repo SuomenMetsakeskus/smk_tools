@@ -199,18 +199,18 @@ class essmodels2points(QgsProcessingAlgorithm):
                 feedb[fgrid[2]](fgrid[1])
 
                 points = parameters['points']
-                points = joinIntersection(outChm,fgrid[0],list(self.grid_fields.split(",")))
-                points = joinIntersection(outChm,biogeo[0],[])
+                points = joinIntersection(points,fgrid[0],list(self.grid_fields.split(",")))
+                points = joinIntersection(points,biogeo[0],[])
 
                 if dtw[2]==1:
-                    outChm = processing.run("native:rastersampling", {'INPUT':outChm,'RASTERCOPY':dtw[0],'COLUMN_PREFIX':'DTW_','OUTPUT':'TEMPORARY_OUTPUT'})
+                    outChm = processing.run("native:rastersampling", {'INPUT':points,'RASTERCOPY':dtw[0],'COLUMN_PREFIX':'DTW_','OUTPUT':'TEMPORARY_OUTPUT'})
                     outChm = outChm['OUTPUT']
                 else:
                     outChm.dataProvider().addAttributes([QgsField("DTW_1",QVariant.Double)])
                     outChm.updateFields()
                     
                 if euc[2]==1:
-                    outChm = processing.run("native:rastersampling", {'INPUT':outChm,'RASTERCOPY':euc[0],'COLUMN_PREFIX':'euc_','OUTPUT':'TEMPORARY_OUTPUT'})
+                    outChm = processing.run("native:rastersampling", {'INPUT':points,'RASTERCOPY':euc[0],'COLUMN_PREFIX':'euc_','OUTPUT':'TEMPORARY_OUTPUT'})
                     outChm = outChm['OUTPUT']
                 else:
                     outChm.dataProvider().addAttributes([QgsField("euc_1",QVariant.Double)])
