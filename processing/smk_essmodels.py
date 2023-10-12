@@ -84,7 +84,7 @@ def calculateBiodiversity(in_feat:QgsVectorLayer,speciesfield:list):
             feat['biod'] = float(sim_di)
             in_feat.updateFeature(feat)
     
-    normalizeValue(in_feat,'biod',None,False)
+    #normalizeValue(in_feat,'biod',None,False)
 
 def calculateDecayTreePotential(in_feat,fz_field):
     
@@ -118,7 +118,7 @@ def calculateDecayTreePotential(in_feat,fz_field):
             
             in_feat.updateFeature(feat)
     
-    normalizeValue(in_feat,"dtree",None,False)
+    #normalizeValue(in_feat,"dtree",None,False)
 
 def decay2tree(in_feat:QgsVectorLayer,diameter:str,fertilityclass:str,treespecies:str,biogeoclass:str):
     """
@@ -149,7 +149,7 @@ def decay2tree(in_feat:QgsVectorLayer,diameter:str,fertilityclass:str,treespecie
             
             in_feat.updateFeature(feat)
     
-    normalizeValue(in_feat,"dtree",None,False)
+    #normalizeValue(in_feat,"dtree",None,False)
 
 
 def calculateNPretention(in_feat):
@@ -159,11 +159,10 @@ def calculateNPretention(in_feat):
     with edit(in_feat):
         for feat in in_feat.getFeatures():
             if type(feat['euc_1']) in (float,int):
-                feat['pRetent'] = ret['P']/limit(feat['euc_1'],1,40) * feat['DTW_1n']
-                
+                feat['pRetent'] = ret['P']/limit(feat['euc_1'],1,40)
             in_feat.updateFeature(feat)
     
-    normalizeValue(in_feat,'pRetent',None,False)
+    #normalizeValue(in_feat,'pRetent',None,False)
 
 def calculateEnvValue(in_feat,weights):
     in_feat.dataProvider().addAttributes([QgsField("env_value",QVariant.Double)])
@@ -216,10 +215,10 @@ def runEssModel(in_feat:QgsVectorLayer,weights,treecount,cuttingsize,fz_field):
     return retrees
 
 def runEssModel2points(in_feat:QgsVectorLayer,trees_field,d_field,weights):
-    normalizeValue(in_feat,"DTW_1",(0.0,0.8),True)
+    #normalizeValue(in_feat,"DTW_1",(0.0,0.8),True)
     calculateBiodiversity(in_feat,["STEMCOUNTPINE","STEMCOUNTDECIDUOUS","STEMCOUNTSPRUCE"])
     #calculateDecayTreePotential(in_feat)
     decay2tree(in_feat,d_field,'FERTILITYCLASS',trees_field,'PaajakoNro')
     calculateNPretention(in_feat)
     #weights ={"NP":float(1),"BIO":float(1),"LP":float(1),"DTW":float(1)}
-    calculateEnvValue(in_feat,weights)
+    #calculateEnvValue(in_feat,weights)

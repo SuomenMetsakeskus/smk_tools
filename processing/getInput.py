@@ -4,7 +4,7 @@ from qgis.PyQt.QtCore import QVariant
 from qgis.core import QgsVectorLayer,QgsField,QgsFeature
 from osgeo import gdal
 import numpy as np
-#from qgis import processing
+from qgis import processing
 
 
 def getBboxWmsFormat(in_feat:QgsVectorLayer):
@@ -132,6 +132,7 @@ def getWebVectorLayer(input_polygon:QgsVectorLayer,url:str,name:str,attributes:s
                 infolevel = 3
             else:
                 respo_layer = processing.run("native:fixgeometries",{'INPUT':respo_layer,'OUTPUT':'TEMPORARY_OUTPUT'})
+                respo_layer = respo_layer['OUTPUT']
                 info = "Forest data is ok"
                 infolevel = 1
     
@@ -143,7 +144,7 @@ def getWebVectorLayer(input_polygon:QgsVectorLayer,url:str,name:str,attributes:s
     
     
     
-    return respo_layer['OUTPUT'],info,infolevel
+    return respo_layer,info,infolevel
 
 def getWebRasterLayer(input_polygon:QgsVectorLayer,url:str,name:str):
     tempd = tempfile.TemporaryFile()

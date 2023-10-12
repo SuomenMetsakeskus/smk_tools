@@ -80,14 +80,14 @@ class essmodels2points(QgsProcessingAlgorithm):
     mkasviv_data = 'https://paikkatieto.ymparisto.fi/arcgis/rest/services/INSPIRE/SYKE_EliomaantieteellisetAlueet/MapServer/0'
     euc_data = 'https://aineistot.metsakeskus.fi/metsakeskus/rest/services/Vesiensuojelu/euclidean/ImageServer'
     
-    stand_name = 'stand'
-    gname = 'gridcell'
+    stand_name = 'v1:stand'
+    gname = 'v1:gridcell'
     dtw_name = 'paituli:luke_dtw_04'
     mkasviv_name = 'eliogeoalue'
 
-    stand_fields = 'SPECIALFEATURECODE,SPECIALFEATUREADDITIONALCODE,GEOMETRY'
-    grid_fields = 'GEOMETRY,FERTILITYCLASS,STEMCOUNTPINE,STEMCOUNTDECIDUOUS,STEMCOUNTSPRUCE,MEANDIAMETERDECIDUOUS,MEANDIAMETERPINE,MEANDIAMETERSPRUCE'
-    mkasviv_fields = 'PaajakoNro,Nimi'
+    stand_fields = 'SPECIALFEATURECODE,SPECIALFEATUREADDITIONALCODE,GEOMETRY,STEMCOUNTPINE,STEMCOUNTDECIDUOUS,STEMCOUNTSPRUCE'
+    grid_fields = 'GEOMETRY,FERTILITYCLASS,STEMCOUNTPINE,STEMCOUNTDECIDUOUS,STEMCOUNTSPRUCE'
+    mkasviv_fields = 'PaajakoNro'
 
     def initAlgorithm(self, config):
         """
@@ -169,9 +169,11 @@ class essmodels2points(QgsProcessingAlgorithm):
             # Retrieve the feature source and sink. The 'dest_id' variable is used
             # to uniquely identify the feature sink, and must be included in the
             # dictionary returned by the processAlgorithm function.
-            alg_params = {'DISSOLVE':True,'DISTANCE': 50,'END_CAP_STYLE': 0,'INPUT': parameters['pisteet'],'JOIN_STYLE': 0,'MITER_LIMIT': 1,'SEGMENTS': 5,'OUTPUT':'TEMPORARY_OUTPUT'}
+            alg_params = {'DISSOLVE':True,'DISTANCE': 50,'END_CAP_STYLE': 0,'INPUT': parameters['points'],'JOIN_STYLE': 0,'MITER_LIMIT': 1,'SEGMENTS': 5,'OUTPUT':'TEMPORARY_OUTPUT'}
             source = processing.run('native:buffer', alg_params, context=context, feedback=feedback, is_child_algorithm=False)['OUTPUT']
-
+            source = processing.run("native:multiparttosingleparts", {'INPUT':source,'OUTPUT':'TEMPORARY_OUTPUT'})
+            source = source['OUTPUT']
+            total = source.featureCount()
             #if parameters['hotspot']==True:
             features = source.getFeatures()
             for current, feature in enumerate(features):
@@ -179,12 +181,12 @@ class essmodels2points(QgsProcessingAlgorithm):
                     break
             
                 feedback.setProgressText("Haetaan aineistot rajapinnasta")
-
+                #feedback.pushInfo("pinta-ala: "+str(feature.geometry().area()))
                 #leimFeat = feature.getFeatures()
                 out = feature2Layer(feature,100)
                 #out1 = feature2Layer(feature,0)
                 out.setCrs(source.crs())
-                #out1.setCrs(source.crs())
+
                 
                 dtw = getWebRasterLayer(out,self.dtw_data,self.dtw_name)
                 feedb[dtw[2]](dtw[1])
@@ -210,14 +212,16 @@ class essmodels2points(QgsProcessingAlgorithm):
                     outChm.updateFields()
                     
                 if euc[2]==1:
-                    outChm = processing.run("native:rastersampling", {'INPUT':points,'RASTERCOPY':euc[0],'COLUMN_PREFIX':'euc_','OUTPUT':'TEMPORARY_OUTPUT'})
+                    outChm = processing.run("native:rastersampling", {'INPUT':outChm,'RASTERCOPY':euc[0],'COLUMN_PREFIX':'euc_','OUTPUT':'TEMPORARY_OUTPUT'})
                     outChm = outChm['OUTPUT']
                 else:
                     outChm.dataProvider().addAttributes([QgsField("euc_1",QVariant.Double)])
                     outChm.updateFields()
 
+                points = outChm
+
                 feedback.setProgressText("Lasketaan ympäristötekijöiden arvot")
-                feedback.setProgress(60)
+                #feedback.setProgress(60)
             
 
                 fosf = self.parameterAsInt(parameters,self.FOSFORI,context)
@@ -226,18 +230,19 @@ class essmodels2points(QgsProcessingAlgorithm):
                 lahop = self.parameterAsInt(parameters,self.LAHOP,context)
 
                 weights ={"NP":float(fosf),"BIO":float(biod),"LP":float(lahop),"DTW":float(dtw)}
-                #runEssModel2points
-                feedback.pushInfo(str(parameters['diameter']))
+                runEssModel2points(points,str(parameters['species']),str(parameters['diameter']),weights)
+                #feedback.pushInfo(str(parameters['diameter']))
                 if current == 0:
                     (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,context,
-                    out.fields(), out.wkbType(), out.crs())
+                    points.fields(), points.wkbType(), points.crs())
                 #feedback.pushInfo(str(out.fields().names()))
-                outFeats = out.getFeatures()
+                outFeats = points.getFeatures()
                 for outFeat in outFeats:
                     #feedback.pushInfo(str(outFeat['CHM']))
                     sink.addFeature(outFeat, QgsFeatureSink.FastInsert)
             
                 layer = QgsProcessingUtils.mapLayerFromString(dest_id, context)
+                feedback.setProgress(int(current / total*100))
 
             return {self.OUTPUT: dest_id}
 
