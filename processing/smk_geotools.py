@@ -150,11 +150,11 @@ def addFieldValue(in_feat:QgsVectorLayer,fieldname:str,fieldvalue:float):
     
     return fix['OUTPUT']
 
-def joinIntersection(inlayer,joinlayer,joinfields):
+def joinIntersection(inlayer,joinlayer,joinfields,drop):
     """
     This join by spatial intersection two layers
     """
-    joined = processing.run("native:joinattributesbylocation", {'INPUT':inlayer,'JOIN':joinlayer,'PREDICATE':[0],'JOIN_FIELDS':joinfields,'METHOD':0,'DISCARD_NONMATCHING':True,'PREFIX':'','OUTPUT':'TEMPORARY_OUTPUT'})
+    joined = processing.run("native:joinattributesbylocation", {'INPUT':inlayer,'JOIN':joinlayer,'PREDICATE':[0],'JOIN_FIELDS':joinfields,'METHOD':0,'DISCARD_NONMATCHING':drop,'PREFIX':'','OUTPUT':'TEMPORARY_OUTPUT'})
 
     return joined['OUTPUT']
 
@@ -167,7 +167,7 @@ def hsAnalysis(in_feat,fieldname):
 
     tempd = tempfile.TemporaryFile()
     tempd = tempd.name+'.tif'
-
+    in_feat.updateExtents()
     ext = in_feat.extent()
     idx = in_feat.dataProvider().fieldNameIndex(fieldname)
 
@@ -179,9 +179,10 @@ def hsAnalysis(in_feat,fieldname):
 
 
     idw_interpolator = QgsIDWInterpolator([layer_data])
-    res = 1
-    ncols = int( ( ext.xMaximum() - ext.xMinimum() ) / res )
-    nrows = int( (ext.yMaximum() - ext.yMinimum() ) / res)
+    res = 1.0
+    
+    ncols = int((ext.xMaximum() -ext.xMinimum()) / res )
+    nrows = int((ext.yMaximum() - ext.yMinimum()) / res)
 
     out  = QgsGridFileWriter(idw_interpolator,tempd,ext,ncols,nrows)
     out.writeFile()

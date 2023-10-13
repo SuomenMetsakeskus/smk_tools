@@ -253,11 +253,11 @@ class saastopuu_toolsAlgorithm(QgsProcessingAlgorithm):
             feedback.setProgress(50)
 
 
-            outChm = joinIntersection(outChm,stand[0],list(self.stand_fields.split(",")))
-            outChm = joinIntersection(outChm,fgrid[0],list(self.grid_fields.split(",")))
-            outChm = joinIntersection(outChm,biogeo[0],[])
-            outChm = joinIntersection(outChm,proSites,[])
-            outChm = joinIntersection(outChm,leim,['leimikko'])
+            outChm = joinIntersection(outChm,stand[0],list(self.stand_fields.split(",")),False)
+            outChm = joinIntersection(outChm,fgrid[0],list(self.grid_fields.split(",")),False)
+            outChm = joinIntersection(outChm,biogeo[0],[],False)
+            outChm = joinIntersection(outChm,proSites,[],False)
+            outChm = joinIntersection(outChm,leim,['leimikko'],False)
 
             if dtw[2]==1:
                 outChm = processing.run("native:rastersampling", {'INPUT':outChm,'RASTERCOPY':dtw[0],'COLUMN_PREFIX':'DTW_','OUTPUT':'TEMPORARY_OUTPUT'})

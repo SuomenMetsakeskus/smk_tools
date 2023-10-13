@@ -286,10 +286,10 @@ class saastopuu_toolsAlgorithm_qgis(QgsProcessingAlgorithm):
 
 
             #outChm = joinIntersection(outChm,stand[0],list(self.stand_fields.split(",")))
-            outChm = joinIntersection(outChm,fgrid,list(self.grid_fields.split(",")))
-            outChm = joinIntersection(outChm,biogeo,[])
+            outChm = joinIntersection(outChm,fgrid,list(self.grid_fields.split(",")),False)
+            outChm = joinIntersection(outChm,biogeo,[],False)
             #outChm = joinIntersection(outChm,proSites,[])
-            outChm = joinIntersection(outChm,leim,['leimikko'])
+            outChm = joinIntersection(outChm,leim,['leimikko'],False)
 
             if dtw:
                 outChm = processing.run("native:rastersampling", {'INPUT':outChm,'RASTERCOPY':dtw,'COLUMN_PREFIX':'DTW_','OUTPUT':'TEMPORARY_OUTPUT'})

@@ -201,8 +201,8 @@ class essmodels2points(QgsProcessingAlgorithm):
                 feedb[fgrid[2]](fgrid[1])
 
                 points = parameters['points']
-                points = joinIntersection(points,fgrid[0],list(self.grid_fields.split(",")))
-                points = joinIntersection(points,biogeo[0],[])
+                points = joinIntersection(points,fgrid[0],list(self.grid_fields.split(",")),True)
+                points = joinIntersection(points,biogeo[0],[],True)
 
                 if dtw[2]==1:
                     outChm = processing.run("native:rastersampling", {'INPUT':points,'RASTERCOPY':dtw[0],'COLUMN_PREFIX':'DTW_','OUTPUT':'TEMPORARY_OUTPUT'})
