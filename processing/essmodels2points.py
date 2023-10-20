@@ -254,7 +254,7 @@ class essmodels2points(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Laske ekosysteemipalveluarvot'
+        return 'Ekologiset arvot pisteille'
 
     def icon(self):
         

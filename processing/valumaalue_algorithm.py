@@ -183,7 +183,7 @@ class Valumamalli(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Laske valuma-alue'
+        return 'Valuma-alueen määritys'
 
     def icon(self):
         

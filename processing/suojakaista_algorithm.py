@@ -223,7 +223,7 @@ class suojakaista_toolsAlgorithm(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Luo suojakaistaehdotus'
+        return 'Suojakaistaehdotus'
     def icon(self):
 
         return QIcon(os.path.join(pluginPath, 'icon.jpg'))

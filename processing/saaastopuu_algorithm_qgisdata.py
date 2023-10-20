@@ -48,7 +48,7 @@ import os,time,sys
 sys.path.append(os.path.dirname(__file__))
 #from PIL import Image
 from getInput import getWebRasterLayer,getWebVectorLayer,getProtectedSites
-from smk_geotools import feature2Layer,createTreeMap,addFieldValue,joinIntersection
+from smk_geotools import feature2Layer,createTreeMap,addFieldValue,joinIntersection,point2area,clipRaster2
 from smk_essmodels import runEssModel
 #from saastopuu import *
 pluginPath = os.path.abspath(
@@ -64,6 +64,7 @@ class saastopuu_toolsAlgorithm_qgis(QgsProcessingAlgorithm):
     # calling from the QGIS console.
 
     OUTPUT = 'OUTPUT'
+    AREAS = 'AREAS'
     FOSFORI = 'FOSFORI'
     DTW = 'DTW'
     BIOD = 'BIOD'
@@ -71,7 +72,10 @@ class saastopuu_toolsAlgorithm_qgis(QgsProcessingAlgorithm):
     PUUM = 'PUUM'
     INPUT = 'INPUT'
 
-    chm_data = 'https://rajapinnat.metsaan.fi/geoserver/Avoinmetsatieto/CHM_newest/ows?'
+    
+    delfields = ['fid','OBJECTID','layer','path','leimikko','SPECIALFEATURECODE', 'SPECIALFEATUREADDITIONALCODE', 'DEVELOPMENTCLASS', 'STEMCOUNTPINE', 'STEMCOUNTDECIDUOUS', 'STEMCOUNTSPRUCE', 'PaajakoNro', 'Nimi_2','MEANDIAMETERDECIDUOUS', 'MEANDIAMETERPINE', 'MEANDIAMETERSPRUCE', 'MEANHEIGHTDECIDUOUS', 'MEANHEIGHTPINE', 'MEANHEIGHTSPRUCE']
+    
+    chm_data = 'https://avoin.metsakeskus.fi/rajapinnat/v1/CHM_newest/ows?'
     grid_data = 'https://avoin.metsakeskus.fi/rajapinnat/v1/gridcell/ows?'
     stand_data = 'https://avoin.metsakeskus.fi/rajapinnat/v1/stand/ows?'
     dtw_data = 'https://paituli.csc.fi/geoserver/paituli/wcs?'
@@ -168,10 +172,15 @@ class saastopuu_toolsAlgorithm_qgis(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT,
-                self.tr('Säästöpuut')
+                self.tr('Puiden ekologiset arvot')
             )
         )
-    
+        self.addParameter(
+            QgsProcessingParameterFeatureSink(
+                self.AREAS,
+                self.tr('Säästöpuuehdotus')
+            )
+        )
 
     def processAlgorithm(self, parameters, context, feedback):
         """
@@ -211,7 +220,7 @@ class saastopuu_toolsAlgorithm_qgis(QgsProcessingAlgorithm):
             #uri = "polygon?crs="+str(source.sourceCrs())+"&field=id:integer&"
             #QgsVectorLayer(uri,"mem","memory")
             #feedback.pushInfo(parameters['dtw'].valueAsPythonString())
-            feedback.setProgressText("Haetaan aineistot rajapinnasta")
+            feedback.setProgressText("Rajataan aineistot")
 
             #leimFeat = feature.getFeatures()
             leimArea = [feature.geometry().area()/10000]
@@ -220,107 +229,102 @@ class saastopuu_toolsAlgorithm_qgis(QgsProcessingAlgorithm):
             out.setCrs(source.crs())
             out1.setCrs(source.crs())
             
-            
-            chm = processing.run('gdal:cliprasterbyextent',{'DATA_TYPE': 0,  # Käytä syötetason tietotyyppiä
-                                                            'EXTRA': '',
-                                                            'INPUT': parameters['chm'],
-                                                            'NODATA': None,
-                                                            'OPTIONS': '',
-                                                            'OVERCRS': False,
-                                                            'PROJWIN': out,
-                                                            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT}, context=context, feedback=feedback, is_child_algorithm=True)
-            chm = chm['OUTPUT']
-            
-            fgrid = processing.run('native:clip',{'INPUT':parameters['forestgrid'],
-                                                  'OVERLAY':out,
-                                                  'OUTPUT':'TEMPORARY_OUTPUT'}, context=context, feedback=feedback, is_child_algorithm=False)
-            
-            fgrid = fgrid['OUTPUT']
-            
-            dtw = processing.run('gdal:cliprasterbyextent',{'DATA_TYPE': 0,  # Käytä syötetason tietotyyppiä
-                                                            'EXTRA': '',
-                                                            'INPUT': parameters['dtw'],
-                                                            'NODATA': None,
-                                                            'OPTIONS': '',
-                                                            'OVERCRS': False,
-                                                            'PROJWIN': out,
-                                                            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT}, context=context, feedback=feedback, is_child_algorithm=True)
-
-            dtw = dtw['OUTPUT']
-
-            biogeo = processing.run('native:clip',{'INPUT':parameters['vegetationzone'],
-                                                  'OVERLAY':out,
-                                                  'OUTPUT':'TEMPORARY_OUTPUT'}, context=context, feedback=feedback, is_child_algorithm=False)
-            
-            biogeo = biogeo['OUTPUT']
-            euc = processing.run('gdal:cliprasterbyextent',{'DATA_TYPE': 0,  # Käytä syötetason tietotyyppiä
-                                                            'EXTRA': '',
-                                                            'INPUT': parameters['waterdistance'],
-                                                            'NODATA': None,
-                                                            'OPTIONS': '',
-                                                            'OVERCRS': False,
-                                                            'PROJWIN': out,
-                                                            'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT}, context=context, feedback=feedback, is_child_algorithm=True)
-            
-            euc = euc['OUTPUT']
-                        
-            leim = addFieldValue(out1,"leimikko",1)
-            
-            feedback.setProgress(10)
-
-            
-            feedback.setProgressText("Aloitetaan puukartan luonti")
-            feedback.setProgress(10)
-            #print (chm)
-            #chm =processRaster(chm[0])
-            feedback.setProgress(20)
-            feedback.setProgressText("vektoroidaan puukartta")
-            feedback.setProgress(30)
-            
-            outChm = createTreeMap(chm,3,False)
-
-            feedback.setProgress(40)
-
-            feedback.setProgressText("Rikastetaan tiedot")
-            feedback.setProgress(50)
-
-
-            #outChm = joinIntersection(outChm,stand[0],list(self.stand_fields.split(",")))
-            outChm = joinIntersection(outChm,fgrid,list(self.grid_fields.split(",")),False)
-            outChm = joinIntersection(outChm,biogeo,[],False)
-            #outChm = joinIntersection(outChm,proSites,[])
-            outChm = joinIntersection(outChm,leim,['leimikko'],False)
-
-            if dtw:
-                outChm = processing.run("native:rastersampling", {'INPUT':outChm,'RASTERCOPY':dtw,'COLUMN_PREFIX':'DTW_','OUTPUT':'TEMPORARY_OUTPUT'})
-                outChm = outChm['OUTPUT']
-            else:
-                outChm.dataProvider().addAttributes([QgsField("DTW_1",QVariant.Double)])
-                outChm.updateFields()
+            try:
+                chm = QgsProcessingUtils.mapLayerFromString(parameters['chm'],context)
+                chm = clipRaster2(chm,out)
                 
-            if euc:
-                outChm = processing.run("native:rastersampling", {'INPUT':outChm,'RASTERCOPY':euc,'COLUMN_PREFIX':'euc_','OUTPUT':'TEMPORARY_OUTPUT'})
-                outChm = outChm['OUTPUT']
-            else:
-                outChm.dataProvider().addAttributes([QgsField("euc_1",QVariant.Double)])
-                outChm.updateFields()
+                #chm = processing.run('gdal:cliprasterbyextent',{'DATA_TYPE': 0,  # Käytä syötetason tietotyyppiä
+                #                                                'EXTRA': '',
+                #                                               'INPUT': parameters['chm'],
+                #                                              'NODATA': None,
+                #                                             'OPTIONS': '',
+                    #                                            'OVERCRS': False,
+                    #                                           'PROJWIN': out,
+                    #                                          'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT}, context=context, feedback=feedback, is_child_algorithm=True)
+                #chm = chm['OUTPUT']
+                
+                fgrid = processing.run('native:clip',{'INPUT':parameters['forestgrid'],
+                                                    'OVERLAY':out,
+                                                    'OUTPUT':'TEMPORARY_OUTPUT'}, context=context, feedback=feedback, is_child_algorithm=False)
+                
+                fgrid = fgrid['OUTPUT']
+                dtw = QgsProcessingUtils.mapLayerFromString(parameters['dtw'],context)
+                dtw = clipRaster2(dtw,out)
+                
+                biogeo = processing.run('native:clip',{'INPUT':parameters['vegetationzone'],
+                                                    'OVERLAY':out,
+                                                    'OUTPUT':'TEMPORARY_OUTPUT'}, context=context, feedback=feedback, is_child_algorithm=False)
+                
+                biogeo = biogeo['OUTPUT']
+                
+                euc = QgsProcessingUtils.mapLayerFromString(parameters['waterdistance'],context)
+                euc = clipRaster2(euc,out)
 
-            feedback.setProgressText("Lasketaan ympäristötekijöiden arvot")
-            feedback.setProgress(60)
             
-            
-            fosf = self.parameterAsInt(parameters,self.FOSFORI,context)
-            dtw = self.parameterAsInt(parameters,self.DTW,context)
-            biod = self.parameterAsInt(parameters,self.BIOD,context)
-            lahop = self.parameterAsInt(parameters,self.LAHOP,context)
-            weights ={"NP":float(fosf),"BIO":float(biod),"LP":float(lahop),"DTW":float(dtw)}
-            puuMaara = self.parameterAsInt(parameters,self.PUUM,context)
-            
-            
-            out = runEssModel(outChm,weights,puuMaara,leimArea[0],"paajakonro")
+                            
+                leim = addFieldValue(out1,"leimikko",1)
+                
+                feedback.setProgress(10)
 
+                
+                feedback.setProgressText("Aloitetaan puukartan luonti")
+                feedback.setProgress(10)
+                #print (chm)
+                #chm =processRaster(chm[0])
+                feedback.setProgress(20)
+                feedback.setProgressText("vektoroidaan puukartta")
+                feedback.setProgress(30)
+                
+                outChm = createTreeMap(chm,3,False)
+
+                feedback.setProgress(40)
+
+                feedback.setProgressText("Rikastetaan tiedot")
+                feedback.setProgress(50)
+
+
+                #outChm = joinIntersection(outChm,stand[0],list(self.stand_fields.split(",")))
+                outChm = joinIntersection(outChm,fgrid,list(self.grid_fields.split(",")),False)
+                outChm = joinIntersection(outChm,biogeo,[],False)
+                #outChm = joinIntersection(outChm,proSites,[])
+                outChm = joinIntersection(outChm,leim,['leimikko'],False)
+
+                if dtw:
+                    outChm = processing.run("native:rastersampling", {'INPUT':outChm,'RASTERCOPY':dtw,'COLUMN_PREFIX':'DTW_','OUTPUT':'TEMPORARY_OUTPUT'})
+                    outChm = outChm['OUTPUT']
+                else:
+                    outChm.dataProvider().addAttributes([QgsField("DTW_1",QVariant.Double)])
+                    outChm.updateFields()
+                    
+                if euc:
+                    outChm = processing.run("native:rastersampling", {'INPUT':outChm,'RASTERCOPY':euc,'COLUMN_PREFIX':'euc_','OUTPUT':'TEMPORARY_OUTPUT'})
+                    outChm = outChm['OUTPUT']
+                else:
+                    outChm.dataProvider().addAttributes([QgsField("euc_1",QVariant.Double)])
+                    outChm.updateFields()
+
+                feedback.setProgressText("Lasketaan ympäristötekijöiden arvot")
+                feedback.setProgress(60)
+                
+                
+                fosf = self.parameterAsInt(parameters,self.FOSFORI,context)
+                dtw = self.parameterAsInt(parameters,self.DTW,context)
+                biod = self.parameterAsInt(parameters,self.BIOD,context)
+                lahop = self.parameterAsInt(parameters,self.LAHOP,context)
+                weights ={"NP":float(fosf),"BIO":float(biod),"LP":float(lahop),"DTW":float(dtw)}
+                puuMaara = self.parameterAsInt(parameters,self.PUUM,context)
+                
+                
+                #out = runEssModel(outChm,weights,puuMaara,leimArea[0],"paajakonro")
+                out = outChm
+            except Exception as e:
+                feedback.pushInfo(str(e))
             feedback.setProgressText("koko: "+str(round(leimArea[0],2))+"\ns-puiden määrä: "+str(int(puuMaara*leimArea[0])))
             feedback.setProgressText("viimeistellään")
+
+            idx=[out.fields().indexFromName(n) for n in self.delfields]
+            out.dataProvider().deleteAttributes(idx)
+            out.updateFields()
 
             style = os.path.join(os.path.dirname(__file__),"reTree3.qml")
            
@@ -358,13 +362,21 @@ class saastopuu_toolsAlgorithm_qgis(QgsProcessingAlgorithm):
             layer = QgsProcessingUtils.mapLayerFromString(dest_id, context)
             feedback.setProgress(int(current * total))
 
-        # Return the results of the algorithm. In this case our only result is
-        # the feature sink which contains the processed features, but some
-        # algorithms may return multiple feature sinks, calculated numeric
-        # statistics, etc. These should all be included in the returned
-        # dictionary, with keys matching the feature corresponding parameter
-        # or output names.
-        layer.loadNamedStyle(style)
+        
+        #layer.loadNamedStyle(style)
+        #style2 = os.path.join(os.path.dirname(__file__),"retreet_areas.qml")
+        #reareas = point2area(layer,'reTree',1)
+        
+        #(sink, area_id) = self.parameterAsSink(parameters, self.AREAS,context,
+         #           reareas.fields(), reareas.wkbType(), reareas.crs())
+        #outFeats = reareas.getFeatures()
+        #for outFeat in outFeats:
+        #        #feedback.pushInfo(str(outFeat['CHM']))
+         #       sink.addFeature(outFeat, QgsFeatureSink.FastInsert)
+        
+        #layer2 = QgsProcessingUtils.mapLayerFromString(area_id, context)
+        #layer2.loadNamedStyle(style2)
+
         return {self.OUTPUT: dest_id}
 
     def name(self):
@@ -375,7 +387,7 @@ class saastopuu_toolsAlgorithm_qgis(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Luo säästöpuuehdotus (oma data)'
+        return 'Säästöpuuehdotus (oma data)'
 
     def icon(self):
         

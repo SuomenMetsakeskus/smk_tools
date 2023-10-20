@@ -67,7 +67,7 @@ def focalMaximaCHM(input_raster,distance,convert):
     chmB = chm.GetRasterBand(1)
     chmA = chmB.ReadAsArray()
     if convert == True:
-        chmA = (chmA-126)*0.232 #vaihe 1
+        chmA = -0.118*chmA+30.1567 #vaihe 1
 
     focal = calcFocal(chmA,distance) #vaihe 2
     huip = focal - chmA
@@ -192,3 +192,105 @@ def hsAnalysis(in_feat,fieldname):
     #hs = processing.run("qgis:idwinterpolation",{'INTERPOLATION_DATA':in_name+"::~::0::~::"+str(idx)+"::~::0",'DISTANCE_COEFFICIENT':2,'EXTENT':ext,'PIXEL_SIZE':1,'OUTPUT':'TEMPORARY_OUTPUT'})
     
     return out['OUTPUT']
+
+
+def copyVector(layer):
+    
+    feats = [feat for feat in layer.getFeatures()]
+    crs = str(layer.crs().authid())
+    mem_layer = QgsVectorLayer("Point?crs="+crs, "copy", "memory")
+
+    mem_layer_data = mem_layer.dataProvider()
+    attr = layer.dataProvider().fields().toList()
+    mem_layer_data.addAttributes(attr)
+    mem_layer.updateFields()
+    mem_layer_data.addFeatures(feats)
+
+    return mem_layer
+
+    
+def point2area(input_points,fname,value):
+    """
+    This converts points to area. You can filter points specific field value.
+    """
+    copylayer = copyVector(input_points)
+    if len(fname) > 0 and value is not None:
+        NoLeim = [feat.id() for feat in copylayer.getFeatures() if feat[fname]!=value]
+    
+        copylayer.dataProvider().deleteFeatures(NoLeim)
+        copylayer.updateFields()
+
+
+    buf = processing.run("native:buffer", {'INPUT':copylayer,
+                                    'DISTANCE':6,
+                                    'SEGMENTS':5,
+                                    'END_CAP_STYLE':0,
+                                    'JOIN_STYLE':0,
+                                    'MITER_LIMIT':2,
+                                    'DISSOLVE':True,
+                                    'OUTPUT':'TEMPORARY_OUTPUT'})['OUTPUT']
+
+    
+    part = processing.run("native:multiparttosingleparts", {'INPUT':buf,'OUTPUT':'TEMPORARY_OUTPUT'})['OUTPUT']
+
+    buf1 = processing.run("native:buffer", {'INPUT':part,
+                                    'DISTANCE':12,
+                                    'SEGMENTS':5,
+                                    'END_CAP_STYLE':0,
+                                    'JOIN_STYLE':0,
+                                    'MITER_LIMIT':2,
+                                    'DISSOLVE':False,
+                                    'OUTPUT':'TEMPORARY_OUTPUT'})['OUTPUT']
+
+    buf = processing.run("native:buffer", {'INPUT':buf1,
+                                    'DISTANCE':-11,
+                                    'SEGMENTS':5,
+                                    'END_CAP_STYLE':0,
+                                    'JOIN_STYLE':0,
+                                    'MITER_LIMIT':2,
+                                    'DISSOLVE':False,
+                                    'OUTPUT':'TEMPORARY_OUTPUT'})['OUTPUT']
+
+    part = processing.run("native:multiparttosingleparts", {'INPUT':buf,'OUTPUT':'TEMPORARY_OUTPUT'})['OUTPUT']
+
+    return part
+
+def clipRaster2(input_raster,clip_vector):
+    xsize =  int(round(input_raster.rasterUnitsPerPixelX(),0))
+    #ysize = int(round(input_raster.rasterUnitsPerPixelY(),0))
+    orig_name = input_raster.name()
+    #print (chm.name())
+    input_raster.setName("raster")
+    alg_params = {
+                'BURN': 1,
+                'DATA_TYPE': 5,  # Float32
+                'EXTENT': None,
+                'EXTRA': '',
+                'FIELD': '',
+                'HEIGHT': 1,
+                'INIT': None,
+                'INPUT': clip_vector,
+                'INVERT': False,
+                'NODATA': 0,
+                'OPTIONS': '',
+                'UNITS': 0,  # Soluina (pikseleinä)
+                'USE_Z': False,
+                'WIDTH': 1,
+                'OUTPUT':'TEMPORARY_OUTPUT'}
+
+    raster_extent = processing.run('gdal:rasterize', alg_params)
+    raster_extent = raster_extent['OUTPUT']
+
+    alg_params = {
+                'CELLSIZE': xsize,
+                'CRS': None,
+                'EXPRESSION':input_raster.name()+"@1",
+                'EXTENT': raster_extent,
+                'LAYERS': raster_extent,
+                'OUTPUT': 'TEMPORARY_OUTPUT'}
+
+    raster_clip = processing.run('qgis:rastercalculator', alg_params)
+    
+    input_raster.setName(orig_name)
+    
+    return raster_clip['OUTPUT']

@@ -47,7 +47,7 @@ import os,time,sys
 sys.path.append(os.path.dirname(__file__))
 #from PIL import Image
 from getInput import getWebRasterLayer,getWebVectorLayer,getProtectedSites
-from smk_geotools import feature2Layer,createTreeMap,addFieldValue,joinIntersection
+from smk_geotools import feature2Layer,createTreeMap,addFieldValue,joinIntersection,point2area
 from smk_essmodels import runEssModel
 #from saastopuu import *
 pluginPath = os.path.abspath(
@@ -63,12 +63,15 @@ class saastopuu_toolsAlgorithm(QgsProcessingAlgorithm):
     # calling from the QGIS console.
 
     OUTPUT = 'OUTPUT'
+    AREAS = 'AREAS'
     FOSFORI = 'FOSFORI'
     DTW = 'DTW'
     BIOD = 'BIOD'
     LAHOP = 'LAHOP'
     PUUM = 'PUUM'
     INPUT = 'INPUT'
+
+    delfields = ['fid','OBJECTID','layer','path','leimikko','SPECIALFEATURECODE', 'SPECIALFEATUREADDITIONALCODE', 'DEVELOPMENTCLASS', 'STEMCOUNTPINE', 'STEMCOUNTDECIDUOUS', 'STEMCOUNTSPRUCE', 'PaajakoNro', 'Nimi_2','MEANDIAMETERDECIDUOUS', 'MEANDIAMETERPINE', 'MEANDIAMETERSPRUCE', 'MEANHEIGHTDECIDUOUS', 'MEANHEIGHTPINE', 'MEANHEIGHTSPRUCE']
 
     chm_data = 'https://avoin.metsakeskus.fi/rajapinnat/v1/CHM_newest/ows?'
     grid_data = 'https://avoin.metsakeskus.fi/rajapinnat/v1/gridcell/ows?'
@@ -160,10 +163,15 @@ class saastopuu_toolsAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT,
-                self.tr('Säästöpuut')
+                self.tr('Puiden ekologiset arvot')
             )
         )
-    
+        self.addParameter(
+            QgsProcessingParameterFeatureSink(
+                self.AREAS,
+                self.tr('Säästöpuuehdotus')
+            )
+        )
 
     def processAlgorithm(self, parameters, context, feedback):
         """
@@ -289,9 +297,9 @@ class saastopuu_toolsAlgorithm(QgsProcessingAlgorithm):
 
             feedback.setProgressText("koko: "+str(round(leimArea[0],2))+"\ns-puiden määrä: "+str(int(puuMaara*leimArea[0])))
             
-            idx=[]
-            idx.append(out.fields().indexFromName('fid'))
-            idx.append(out.fields().indexFromName('OBJECTID'))
+            idx=[out.fields().indexFromName(n) for n in self.delfields]
+            #idx.append(out.fields().indexFromName('fid'))
+            #idx.append(out.fields().indexFromName('OBJECTID'))
             out.dataProvider().deleteAttributes(idx)
             out.updateFields()
 
@@ -303,8 +311,7 @@ class saastopuu_toolsAlgorithm(QgsProcessingAlgorithm):
                 feedback.setProgress(i+1)
 
             style = os.path.join(os.path.dirname(__file__),"reTree3.qml")
-           
-       
+        
             #out = outChm['OUTPUT']
             # Add a feature in the sink
             if current == 0:
@@ -344,7 +351,20 @@ class saastopuu_toolsAlgorithm(QgsProcessingAlgorithm):
         # dictionary, with keys matching the feature corresponding parameter
         # or output names.
         layer.loadNamedStyle(style)
-        return {self.OUTPUT: dest_id}
+        style2 = os.path.join(os.path.dirname(__file__),"retreet_areas.qml")
+        reareas = point2area(layer,'reTree',1)
+        
+        (sink, area_id) = self.parameterAsSink(parameters, self.AREAS,context,
+                    reareas.fields(), reareas.wkbType(), reareas.crs())
+        outFeats = reareas.getFeatures()
+        for outFeat in outFeats:
+                #feedback.pushInfo(str(outFeat['CHM']))
+                sink.addFeature(outFeat, QgsFeatureSink.FastInsert)
+        
+        layer2 = QgsProcessingUtils.mapLayerFromString(area_id, context)
+        layer2.loadNamedStyle(style2)
+
+        return {self.OUTPUT: dest_id,self.AREAS:area_id}
 
     def name(self):
         """
@@ -354,7 +374,7 @@ class saastopuu_toolsAlgorithm(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Luo säästöpuuehdotus'
+        return 'Säästöpuuehdotus'
 
     def icon(self):
         

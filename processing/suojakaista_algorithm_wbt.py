@@ -223,7 +223,7 @@ class suojakaista_toolsAlgorithm_wbt(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'Luo suojakaistaehdotus (Whiteboxtools)'
+        return 'Suojakaistaehdotus (WBT-lisäosalla)'
     def icon(self):
 
         return QIcon(os.path.join(pluginPath, 'icon.jpg'))

@@ -54,6 +54,59 @@ def normalizeValue(in_feat:QgsVectorLayer,fieldname:str,filtervalues:tuple,trans
             
             in_feat.updateFeature(feat)
 
+def treespeciesFromGrid(in_feat:QgsVectorLayer):
+    """
+    This determines treespecies from grid data. Grid data much have fields MEANDIAMETER<treespecies>
+    """
+
+    trees = {'MEANDIAMETERDECIDUOUS':3, 'MEANDIAMETERPINE':1, 'MEANDIAMETERSPRUCE':2}
+
+    
+    in_feat.dataProvider().addAttributes([QgsField("treespecies",QVariant.Int)])
+    in_feat.dataProvider().addAttributes([QgsField("diameter",QVariant.Double)])
+    in_feat.updateFields()
+    
+    with edit(in_feat):
+        for c,feat in enumerate(in_feat.getFeatures()):
+            m = max([feat[t] for t in trees])
+            #print (m)
+            i  = [t for t in trees if feat[t]==m]
+            #print (m,i,trees[i[0]])
+            feat["treespecies"]=trees[i[0]]
+            feat["diameter"]=m
+            #feat['biod'] = float(sim_di+conver_cof)
+            in_feat.updateFeature(feat)
+
+def treespeciesFromGrid2(in_feat:QgsVectorLayer,chm_height):
+    trees = {'MEANDIAMETERDECIDUOUS':3, 'MEANDIAMETERPINE':1, 'MEANDIAMETERSPRUCE':2}
+
+    u = 10
+
+    in_feat.dataProvider().addAttributes([QgsField("treespecies",QVariant.Int)])
+    in_feat.dataProvider().addAttributes([QgsField("diameter",QVariant.Double)])
+    in_feat.dataProvider().addAttributes([QgsField("chm_height",QVariant.Double)])
+    in_feat.updateFields()
+    
+    with edit(in_feat):
+        for c,feat in enumerate(in_feat.getFeatures()):
+            m = max([feat[t] for t in trees])
+            h_list = [round(abs(feat[chm_height]/u-feat[t.replace('DIAMETER','HEIGHT')]),2) for t in trees if type(feat[t.replace('DIAMETER','HEIGHT')]) in (int,float)] #getting closest difference value between chm_height and grid heights
+            if len(h_list)>0:
+                h = min(h_list)
+                i =  [t for t in trees if type(feat[t.replace('DIAMETER','HEIGHT')]) in (int,float) and round(abs(feat[chm_height]/u-feat[t.replace('DIAMETER','HEIGHT')]),2) == h] #getting dict key of the closest height value 
+                feat["treespecies"]=trees[i[0]]
+                feat["diameter"]=(feat[chm_height]/u) / feat[i[0].replace('DIAMETER','HEIGHT')]*feat[i[0]] #diameter = chm_height / meanheight<treepspecies> * meandiameter<treepspecies>
+                feat['chm_height'] = feat[chm_height]/u
+            elif type(m) in (float,int):
+                #m = max([feat[t] for t in trees])
+                i  = [t for t in trees if feat[t]==m]
+                feat["treespecies"]=trees[i[0]]
+                feat["diameter"]=m
+                feat['chm_height'] = feat[chm_height]/u
+
+            
+            in_feat.updateFeature(feat)
+
 def simpson_di(species):
     """
     This calculates simpson diversity index by formula D = n(n-1)/N(N-1)
@@ -73,15 +126,17 @@ def calculateBiodiversity(in_feat:QgsVectorLayer,speciesfield:list):
     Species list have to be format of [1,35,42,2,23,...,n]
     """
     
-    in_feat.dataProvider().addAttributes([QgsField("biod",QVariant.Double)])
+    in_feat.dataProvider().addAttributes([QgsField("biod",QVariant.Double),QgsField("treedistribution",QVariant.List)])
     in_feat.updateFields()
     
     with edit(in_feat):
         for feat in in_feat.getFeatures():
             
             sim_di = simpson_di([feat[i] for i in speciesfield if type(feat[i]) in (int,float)])
-            
-            feat['biod'] = float(sim_di)
+            dis = [feat[i] for i in speciesfield if type(feat[i]) in (int,float)]
+            dis = [round(i / sum(dis),2) for i in dis]
+            feat['biod'] = round(float(sim_di),3)
+            feat['treedistribution']=dis
             in_feat.updateFeature(feat)
     
     #normalizeValue(in_feat,'biod',None,False)
@@ -144,7 +199,7 @@ def decay2tree(in_feat:QgsVectorLayer,diameter:str,fertilityclass:str,treespecie
             else:
                 potvalues=0
             
-            feat["dtree"]=float(potvalues)
+            feat["dtree"]=round(float(potvalues),3)
             
             
             in_feat.updateFeature(feat)
@@ -159,7 +214,7 @@ def calculateNPretention(in_feat):
     with edit(in_feat):
         for feat in in_feat.getFeatures():
             if type(feat['euc_1']) in (float,int):
-                feat['pRetent'] = ret['P']/limit(feat['euc_1'],1,40)
+                feat['pRetent'] = ret['P']/limit(feat['euc_1'],1,100)
             in_feat.updateFeature(feat)
     
     #normalizeValue(in_feat,'pRetent',None,False)
@@ -204,16 +259,19 @@ def selectReTrees(in_feat:QgsVectorLayer,fieldname:str,cuttingfield:str,treecoun
             in_feat.updateFeature(feat)
 
 def runEssModel(in_feat:QgsVectorLayer,weights,treecount,cuttingsize,fz_field):
-    normalizeValue(in_feat,"DTW_1",(0.0,0.8),True)
+    normalizeValue(in_feat,"DTW_1",(0.0,1.0),True)
+    treespeciesFromGrid2(in_feat,"CHM")
     calculateBiodiversity(in_feat,["STEMCOUNTPINE","STEMCOUNTDECIDUOUS","STEMCOUNTSPRUCE"])
-    calculateDecayTreePotential(in_feat,fz_field)
+    decay2tree(in_feat,'diameter','FERTILITYCLASS','treespecies',fz_field)
+    #calculateDecayTreePotential(in_feat,fz_field)
     calculateNPretention(in_feat)
     normalizeValue(in_feat,"biod",None,False)
     normalizeValue(in_feat,"dtree",None,False)
     normalizeValue(in_feat,"pRetent",None,False)
     calculateEnvValue(in_feat,weights)
     retrees = hsAnalysis(in_feat,'env_value')
-    selectReTrees(retrees,'HS_1','leimikko',treecount,cuttingsize)
+    normalizeValue(retrees,"HS_1",None,False)
+    selectReTrees(retrees,'HS_1n','leimikko',treecount,cuttingsize)
 
     return retrees
 
