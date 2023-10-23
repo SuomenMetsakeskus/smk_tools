@@ -6,7 +6,7 @@ import numpy as np
 from qgis.PyQt.QtCore import QVariant
 from qgis import processing
 #import processing
-from qgis.core import QgsVectorLayer,QgsField,QgsFeature,edit,QgsApplication
+from qgis.core import QgsVectorLayer,QgsField,QgsFeature,edit,QgsApplication,QgsRectangle,QgsRasterLayer
 from qgis.analysis import QgsInterpolator,QgsIDWInterpolator,QgsGridFileWriter
 
 """
@@ -278,15 +278,16 @@ def clipRaster2(input_raster,clip_vector):
                 'WIDTH': 1,
                 'OUTPUT':'TEMPORARY_OUTPUT'}
 
-    raster_extent = processing.run('gdal:rasterize', alg_params)
-    raster_extent = raster_extent['OUTPUT']
+    raster = processing.run('gdal:rasterize', alg_params)
+    raster = raster['OUTPUT']
+    raster_extent = roundExtent(raster,0)
 
     alg_params = {
                 'CELLSIZE': xsize,
                 'CRS': None,
                 'EXPRESSION':input_raster.name()+"@1",
                 'EXTENT': raster_extent,
-                'LAYERS': raster_extent,
+                'LAYERS': raster,
                 'OUTPUT': 'TEMPORARY_OUTPUT'}
 
     raster_clip = processing.run('qgis:rastercalculator', alg_params)
@@ -294,3 +295,28 @@ def clipRaster2(input_raster,clip_vector):
     input_raster.setName(orig_name)
     
     return raster_clip['OUTPUT']
+
+def roundExtent(raster_layer,decimals:int):
+
+
+    if raster_layer.isValid():
+        # Get the extent of the raster layer
+        extent = raster_layer.extent()
+
+        # Set the number of decimal places to round to
+        decimal_places = decimals  # Adjust as needed
+
+        # Round the extent coordinates to the desired precision
+        rounded_extent = QgsRectangle(
+            round(extent.xMinimum(), decimal_places),
+            round(extent.yMinimum(), decimal_places),
+            round(extent.xMaximum(), decimal_places),
+            round(extent.yMaximum(), decimal_places)
+        )
+
+        # Print the rounded extent
+        print(f"Rounded Extent: {rounded_extent}")
+    else:
+        print("Invalid raster layer")
+
+    return rounded_extent

@@ -36,7 +36,7 @@ from qgis.PyQt.QtCore import QCoreApplication,QVariant
 from qgis.core import (QgsProcessing,
                        QgsField,
                        QgsFeatureSink,
-                       QgsProcessingParameterFeatureSource,QgsProcessingParameterRasterLayer,
+                       QgsProcessingParameterFeatureSource,QgsProcessingParameterRasterDestination,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterEnum,
                        QgsProcessingParameterMapLayer,
@@ -98,15 +98,8 @@ class saastopuu_toolsAlgorithm_qgis(QgsProcessingAlgorithm):
         with some other properties.
         """
 
-        # We add the input vector features source. It can have any kind of
-        # geometry.
-        self.addParameter(
-            QgsProcessingParameterFeatureSource(
-                self.INPUT,
-                self.tr('Leimikko'),
-                [QgsProcessing.TypeVectorPolygon]
-            )
-        )
+        #inputs
+        self.addParameter(QgsProcessingParameterFeatureSource(self.INPUT,self.tr('Leimikko'),[QgsProcessing.TypeVectorPolygon]))
         self.addParameter(QgsProcessingParameterMapLayer('chm', 'Latvusmalli', defaultValue=None, types=[QgsProcessing.TypeRaster]))
         self.addParameter(QgsProcessingParameterMapLayer('dtw', 'DTW', defaultValue=None,types=[QgsProcessing.TypeRaster]))
         self.addParameter(QgsProcessingParameterMapLayer('vegetationzone', 'Metsäkasvillisyysvyöhyke', defaultValue=None, types=[QgsProcessing.TypeVectorPolygon]))
@@ -114,78 +107,29 @@ class saastopuu_toolsAlgorithm_qgis(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterMapLayer('forestgrid', 'Hila-aineisto', types=[QgsProcessing.TypeVectorPolygon]))
         #self.addParameter(QgsProcessingParameterRasterDestination('LeikattuLatvus', 'leikattu latvus', createByDefault=True, defaultValue=None))
         #self.addParameter(QgsProcessingParameterFeatureSink('LeikattuHila', 'Leikattu hila', type=QgsProcessing.TypeVectorAnyGeometry, createByDefault=True, defaultValue=None))
-        params = []
-
-        params.append(
-            QgsProcessingParameterEnum(
-                self.FOSFORI,
-                self.tr('Ravinteiden pidättyminen'),
-                options=['Ei painotusta','Pieni','Keskimääräinen','Suuri'],
-                defaultValue=1
-            )
-            )
-
-        params.append(
-            QgsProcessingParameterEnum(
-                self.DTW,
-                self.tr('Maaperän kosteus'),
-                options=['Ei painotusta','Pieni','Keskimääräinen','Suuri'],
-                defaultValue=1
-            )
-            )
-
-        params.append(
-            QgsProcessingParameterEnum(
-                self.BIOD,
-                self.tr('Puuston monimuotoisuus'),
-                options=['Ei painotusta','Pieni','Keskimääräinen','Suuri'],
-                defaultValue=1
-            )
-            )
-
-        params.append(
-            QgsProcessingParameterEnum(
-                self.LAHOP,
-                self.tr('Lahopuupotentiaali'),
-                options=['Ei painotusta','Pieni','Keskimääräinen','Suuri'],
-                defaultValue=1
-            )
-            )
+        #self.addParameter(QgsProcessingParameterFeatureSink('outpisteet', 'outpisteet', type=QgsProcessing.TypeVectorPoint, createByDefault=True, defaultValue=None))
         
-
+        #parameters
+        params = []
+        params.append(QgsProcessingParameterEnum(self.FOSFORI,self.tr('Ravinteiden pidättyminen'),options=['Ei painotusta','Pieni','Keskimääräinen','Suuri'],defaultValue=1))
+        params.append(QgsProcessingParameterEnum(self.DTW,self.tr('Maaperän kosteus'),options=['Ei painotusta','Pieni','Keskimääräinen','Suuri'],defaultValue=1))
+        params.append(QgsProcessingParameterEnum(self.BIOD,self.tr('Puuston monimuotoisuus'),options=['Ei painotusta','Pieni','Keskimääräinen','Suuri'],defaultValue=1))
+        params.append(QgsProcessingParameterEnum(self.LAHOP,self.tr('Lahopuupotentiaali'),options=['Ei painotusta','Pieni','Keskimääräinen','Suuri'],defaultValue=1))
+        
         for p in params:
             p.setFlags(p.flags() | QgsProcessingParameterDefinition.FlagAdvanced) 
             self.addParameter(p)
 
-        self.addParameter(
-            QgsProcessingParameterNumber(
-                self.PUUM,
-                self.tr('Säästöpuiden määrä (kpl /ha)'),
-                type=QgsProcessingParameterNumber.Integer,
-                minValue=5,maxValue=30,defaultValue=10
-            )
-            )
-
-        # We add a feature sink in which to store our processed features (this
-        # usually takes the form of a newly created vector layer when the
-        # algorithm is run in QGIS).
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(
-                self.OUTPUT,
-                self.tr('Puiden ekologiset arvot')
-            )
-        )
-        self.addParameter(
-            QgsProcessingParameterFeatureSink(
-                self.AREAS,
-                self.tr('Säästöpuuehdotus')
-            )
-        )
+        self.addParameter(QgsProcessingParameterNumber(self.PUUM,self.tr('Säästöpuiden määrä (kpl /ha)'),type=QgsProcessingParameterNumber.Integer,minValue=5,maxValue=30,defaultValue=10))
+        #outputs
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT,self.tr('Puiden ekologiset arvot')))
+        #self.addParameter(QgsProcessingParameterFeatureSink(self.AREAS,self.tr('Säästöpuuehdotus')))
 
     def processAlgorithm(self, parameters, context, feedback):
         """
         Here is where the processing itself takes place.
         """
+        results = {}
         feedb = {1:feedback.setProgressText,
                 2:feedback.pushWarning,
                 3:feedback.reportError}
@@ -232,7 +176,24 @@ class saastopuu_toolsAlgorithm_qgis(QgsProcessingAlgorithm):
             try:
                 chm = QgsProcessingUtils.mapLayerFromString(parameters['chm'],context)
                 chm = clipRaster2(chm,out)
+                feedback.pushInfo(str(QgsRasterLayer(chm,"chm","gdal").rasterUnitsPerPixelX()))
                 
+                dtw = QgsProcessingUtils.mapLayerFromString(parameters['dtw'],context)
+                dtw = clipRaster2(dtw,out)
+                
+                outChm = createTreeMap(chm,3,False)
+
+                if dtw:
+                    outChm = processing.run("native:rastersampling", {'INPUT':outChm,'RASTERCOPY':dtw,'COLUMN_PREFIX':'DTW_','OUTPUT':'TEMPORARY_OUTPUT'})
+                    outChm = outChm['OUTPUT']
+                else:
+                    outChm.dataProvider().addAttributes([QgsField("DTW_1",QVariant.Double)])
+                    outChm.updateFields()
+                
+                feedback.pushInfo(str(outChm.featureCount()))
+                out = outChm
+            except Exception as e:
+                feedback.pushWarning(e)
                 #chm = processing.run('gdal:cliprasterbyextent',{'DATA_TYPE': 0,  # Käytä syötetason tietotyyppiä
                 #                                                'EXTRA': '',
                 #                                               'INPUT': parameters['chm'],
@@ -242,7 +203,20 @@ class saastopuu_toolsAlgorithm_qgis(QgsProcessingAlgorithm):
                     #                                           'PROJWIN': out,
                     #                                          'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT}, context=context, feedback=feedback, is_child_algorithm=True)
                 #chm = chm['OUTPUT']
-                
+
+            if current == 0:
+                (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,context,
+                    out.fields(), out.wkbType(), out.crs())
+            #feedback.pushInfo(str(out.fields().names()))
+            outFeats = out.getFeatures()
+            for outFeat in outFeats:
+                #feedback.pushInfo(str(outFeat['CHM']))
+                sink.addFeature(outFeat, QgsFeatureSink.FastInsert)
+
+
+            return {self.OUTPUT: dest_id}
+
+            """
                 fgrid = processing.run('native:clip',{'INPUT':parameters['forestgrid'],
                                                     'OVERLAY':out,
                                                     'OUTPUT':'TEMPORARY_OUTPUT'}, context=context, feedback=feedback, is_child_algorithm=False)
@@ -282,12 +256,12 @@ class saastopuu_toolsAlgorithm_qgis(QgsProcessingAlgorithm):
                 feedback.setProgressText("Rikastetaan tiedot")
                 feedback.setProgress(50)
 
-
+                
                 #outChm = joinIntersection(outChm,stand[0],list(self.stand_fields.split(",")))
-                outChm = joinIntersection(outChm,fgrid,list(self.grid_fields.split(",")),False)
-                outChm = joinIntersection(outChm,biogeo,[],False)
+                #outChm = joinIntersection(outChm,fgrid,list(self.grid_fields.split(",")),False)
+                #outChm = joinIntersection(outChm,biogeo,[],False)
                 #outChm = joinIntersection(outChm,proSites,[])
-                outChm = joinIntersection(outChm,leim,['leimikko'],False)
+                #outChm = joinIntersection(outChm,leim,['leimikko'],False)
 
                 if dtw:
                     outChm = processing.run("native:rastersampling", {'INPUT':outChm,'RASTERCOPY':dtw,'COLUMN_PREFIX':'DTW_','OUTPUT':'TEMPORARY_OUTPUT'})
@@ -341,7 +315,7 @@ class saastopuu_toolsAlgorithm_qgis(QgsProcessingAlgorithm):
                 sink.addFeature(outFeat, QgsFeatureSink.FastInsert)
         
             
-            """
+            
             if str((layer.dataProvider().dataSourceUri())).startswith("memory?") == True:
                 graafi = ""
             else:
@@ -352,7 +326,7 @@ class saastopuu_toolsAlgorithm_qgis(QgsProcessingAlgorithm):
             #feedback.pushInfo("test: "+str(te))
             graafi = makeRetentionGraph(out,graafi)
             g = Image.open(graafi)
-            g.show()"""
+            g.show()
             #sink.setName("Säästöpuut")
             
 
@@ -377,7 +351,7 @@ class saastopuu_toolsAlgorithm_qgis(QgsProcessingAlgorithm):
         #layer2 = QgsProcessingUtils.mapLayerFromString(area_id, context)
         #layer2.loadNamedStyle(style2)
 
-        return {self.OUTPUT: dest_id}
+        return {self.OUTPUT: dest_id}"""
 
     def name(self):
         """
