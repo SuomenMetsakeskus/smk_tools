@@ -4,8 +4,8 @@ from math import sqrt
 import pandas as pd
 import numpy as np
 from qgis.PyQt.QtCore import QVariant
-from qgis import processing
-#import processing
+#from qgis import processing
+import processing
 from qgis.core import QgsVectorLayer,QgsField,QgsFeature,edit,QgsApplication,QgsRectangle,QgsRasterLayer
 from qgis.analysis import QgsInterpolator,QgsIDWInterpolator,QgsGridFileWriter
 
@@ -258,9 +258,9 @@ def point2area(input_points,fname,value):
 def clipRaster2(input_raster,clip_vector):
     xsize =  int(round(input_raster.rasterUnitsPerPixelX(),0))
     #ysize = int(round(input_raster.rasterUnitsPerPixelY(),0))
-    orig_name = input_raster.name()
+    #orig_name = input_raster.name()
     #print (chm.name())
-    input_raster.setName("raster")
+    #input_raster.setName("raster")
     alg_params = {
                 'BURN': 1,
                 'DATA_TYPE': 5,  # Float32
@@ -279,7 +279,7 @@ def clipRaster2(input_raster,clip_vector):
                 'OUTPUT':'TEMPORARY_OUTPUT'}
 
     raster = processing.run('gdal:rasterize', alg_params)
-    raster = raster['OUTPUT']
+    raster = QgsRasterLayer(raster['OUTPUT'],"extent","gdal")
     raster_extent = roundExtent(raster,0)
 
     alg_params = {
@@ -292,7 +292,7 @@ def clipRaster2(input_raster,clip_vector):
 
     raster_clip = processing.run('qgis:rastercalculator', alg_params)
     
-    input_raster.setName(orig_name)
+    #nput_raster.setName(orig_name)
     
     return raster_clip['OUTPUT']
 

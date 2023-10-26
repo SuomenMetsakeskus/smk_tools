@@ -44,7 +44,7 @@ def normalizeValue(in_feat:QgsVectorLayer,fieldname:str,filtervalues:tuple,trans
     
     with edit(in_feat):
         for feat in in_feat.getFeatures():
-            if type(feat[fieldname]) in (int,float):
+            if type(feat[fieldname]) in (int,float) and maxlis != minlis:
                 if transpose == False:
                     feat[fieldname+"n"] = (feat[fieldname]-minlis) / (maxlis-minlis)
                 else:
@@ -89,7 +89,10 @@ def treespeciesFromGrid2(in_feat:QgsVectorLayer,chm_height):
     
     with edit(in_feat):
         for c,feat in enumerate(in_feat.getFeatures()):
-            m = max([feat[t] for t in trees])
+            try:
+                m = max([feat[t] for t in trees if type(feat[t]) in (int,float)])
+            except:
+                m = None
             h_list = [round(abs(feat[chm_height]/u-feat[t.replace('DIAMETER','HEIGHT')]),2) for t in trees if type(feat[t.replace('DIAMETER','HEIGHT')]) in (int,float)] #getting closest difference value between chm_height and grid heights
             if len(h_list)>0:
                 h = min(h_list)
@@ -185,8 +188,11 @@ def decay2tree(in_feat:QgsVectorLayer,diameter:str,fertilityclass:str,treespecie
 
     with edit(in_feat):
         for feat in in_feat.getFeatures():
-
-            dcp = decay_tree_potential('zone'+str(feat[biogeoclass]))
+            if type(feat[biogeoclass]) in (str,int,float):
+                dcp = decay_tree_potential('zone'+str(feat[biogeoclass]))
+            else:
+                dcp = decay_tree_potential('zone3')
+            #dcp = decay_tree_potential('zone'+str(feat[biogeoclass]))
 
             if type(feat[fertilityclass]) in (int,float) and type(feat[diameter]) in (int,float) and type(feat[treespecies]) in (int,float):
                 if feat[fertilityclass]>6:
