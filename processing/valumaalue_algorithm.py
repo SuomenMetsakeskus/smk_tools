@@ -10,6 +10,7 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterNumber,
                        QgsProcessingParameterPoint,
+                       QgsProcessingParameterRasterLayer,
                        QgsProcessingParameterVectorDestination,
                        QgsVectorLayer,
                        QgsProcessingParameterBoolean,
@@ -19,10 +20,12 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterDefinition,
                        QgsProcessingMultiStepFeedback,
                        QgsProcessingFeatureSourceDefinition,
-                       QgsFeatureRequest)
+                       QgsFeatureRequest,
+                       QgsRasterLayer)
 
-from getInput import getWebRasterLayer
+from getInput import getWebRasterLayer,getBboxWmsFormat
 #from getInput import getWater
+from smk_geotools import clipRaster3
 from fcFunctions import raster2vector2
 
 pluginPath = os.path.abspath(
@@ -32,14 +35,22 @@ pluginPath = os.path.abspath(
 
 class Valumamalli(QgsProcessingAlgorithm):
     jako5 = QgsVectorLayer("crs='EPSG:3067' url='https://aineistot.metsakeskus.fi/metsakeskus/rest/services/Luontotieto/Valumaalueet_t5/MapServer/0' http-header:referer=''","jako5","arcgisfeatureserver")
-    DEMurl = 'https://aineistot.metsakeskus.fi/metsakeskus/rest/services/Vesiensuojelu/DEM/ImageServer'
-    D8url = 'https://aineistot.metsakeskus.fi/metsakeskus/rest/services/Vesiensuojelu/D8_suomi/ImageServer'
+    DEMurl = "cache=PreferNetwork&dpiMode=7&format=GeoTIFF&identifier=1&url=https://aineistot.metsakeskus.fi/metsakeskus/services/Vesiensuojelu/DEM/ImageServer/WCSServer"
+    D8url = "cache=PreferNetwork&dpiMode=7&format=GeoTIFF&identifier=1&url=https://aineistot.metsakeskus.fi/metsakeskus/services/Vesiensuojelu/D8_suomi/ImageServer/WCSServer"
+    FAurl = "cache=PreferNetwork&dpiMode=7&format=GeoTIFF&identifier=1&url=https://aineistot.metsakeskus.fi/metsakeskus/services/Vesiensuojelu/Virtausverkko/MapServer/WCSServer"
 
     #jako5 = iface.addVectorLayer(jako5l)
     def initAlgorithm(self, config=None):
         self.addParameter(QgsProcessingParameterNumber('tartunta', 'Tartuntaetäisyys', type=QgsProcessingParameterNumber.Integer, minValue=0, maxValue=20, defaultValue=5))
         self.addParameter(QgsProcessingParameterPoint('purkupiste', 'purkupiste', defaultValue='0.000000,0.000000'))
         self.addParameter(QgsProcessingParameterFeatureSink('Valuma-alue', 'Valuma-alue'))
+        params = []
+        params.append(QgsProcessingParameterRasterLayer("d8","suuntarasteri",defaultValue="suuntarasteri"))
+        params.append(QgsProcessingParameterRasterLayer("fa","virtausverkko",defaultValue="virtausverkko"))
+        #[p.setFlags(p.flags | QgsProcessingParameterDefinition.FlagAdvanced) for p in params]
+        for p in params:
+            p.setFlags(p.flags() | QgsProcessingParameterDefinition.FlagAdvanced) 
+            self.addParameter(p)
         #self.addParameter(QgsProcessingParameterRasterDestination('Outrast', 'outrast', createByDefault=True, defaultValue=None))
 
     def processAlgorithm(self, parameters, context, model_feedback):
@@ -48,113 +59,115 @@ class Valumamalli(QgsProcessingAlgorithm):
         feedback = QgsProcessingMultiStepFeedback(6, model_feedback)
         results = {}
         outputs = {}
+        try:
+            # Luo taso pisteestä
+            alg_params = {
+                'INPUT': parameters['purkupiste'],
+                'OUTPUT': "TEMPORARY_OUTPUT"
+            }
+            outputs['LuoTasoPisteest'] = processing.run('native:pointtolayer', alg_params, context=context, feedback=feedback, is_child_algorithm=False)
 
-        # Luo taso pisteestä
-        alg_params = {
-            'INPUT': parameters['purkupiste'],
-            'OUTPUT': "TEMPORARY_OUTPUT"
-        }
-        outputs['LuoTasoPisteest'] = processing.run('native:pointtolayer', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
+            feedback.setCurrentStep(1)
+            if feedback.isCanceled():
+                return {}
+            
+            
+            jako5_raj = processing.run("native:joinattributesbylocation",
+                            {'INPUT':self.jako5,
+                                'PREDICATE':[0],
+                                'JOIN':outputs['LuoTasoPisteest']['OUTPUT'],
+                                'JOIN_FIELDS':[],
+                                'METHOD':1,
+                                'DISCARD_NONMATCHING':True,
+                                'PREFIX':'',
+                                'OUTPUT':'TEMPORARY_OUTPUT'},context=context, feedback=feedback, is_child_algorithm=False)
 
-        feedback.setCurrentStep(1)
-        if feedback.isCanceled():
-            return {}
-        
-        
-        jako5_raj = processing.run("native:joinattributesbylocation",
-                           {'INPUT':self.jako5,
-                            'PREDICATE':[0],
-                            'JOIN':outputs['LuoTasoPisteest']['OUTPUT'],
-                            'JOIN_FIELDS':[],
-                            'METHOD':1,
-                            'DISCARD_NONMATCHING':True,
-                            'PREFIX':'',
-                            'OUTPUT':'TEMPORARY_OUTPUT'},context=context, feedback=feedback, is_child_algorithm=False)
+            jako5_raj = jako5_raj['OUTPUT']
+            #feedback.pushInfo("jotain: "+jako5_raj)
+            #feedback.pushInfo("coords = %f,%f,%f,%f" %(jako5_raj.extent().xMinimum(), jako5_raj.extent().xMaximum(), jako5_raj.extent().yMinimum(), jako5_raj.extent().yMaximum()))
+            feedback.setCurrentStep(2)
+            if feedback.isCanceled():
+                return {}
+            
+            jako5_raj = processing.run("native:buffer",
+                            {'INPUT':jako5_raj,
+                                'DISTANCE':500,
+                                'SEGMENTS':5,
+                                'END_CAP_STYLE':0,
+                                'JOIN_STYLE':0,
+                                'MITER_LIMIT':2,
+                                'DISSOLVE':True,
+                                'OUTPUT':'TEMPORARY_OUTPUT'},context=context, feedback=feedback,is_child_algorithm=False)
+            
+            #results['Valuma'] = parameters['Valuma']
 
-        jako5_raj = jako5_raj['OUTPUT']
-        #feedback.pushInfo("jotain: "+jako5_raj)
-        #feedback.pushInfo("coords = %f,%f,%f,%f" %(jako5_raj.extent().xMinimum(), jako5_raj.extent().xMaximum(), jako5_raj.extent().yMinimum(), jako5_raj.extent().yMaximum()))
-        feedback.setCurrentStep(2)
-        if feedback.isCanceled():
-            return {}
-        
-        jako5_raj = processing.run("native:buffer",
-                           {'INPUT':jako5_raj,
-                            'DISTANCE':500,
-                            'SEGMENTS':5,
-                            'END_CAP_STYLE':0,
-                            'JOIN_STYLE':0,
-                            'MITER_LIMIT':2,
-                            'DISSOLVE':True,
-                            'OUTPUT':'TEMPORARY_OUTPUT'},context=context, feedback=feedback,is_child_algorithm=False)
-        
-        #results['Valuma'] = parameters['Valuma']
+            jako5_raj = jako5_raj['OUTPUT']
+            jako5_raj.updateExtents()
+            
+            #feedback.pushInfo(str(jako5_raj.extent()))
+            feedback.setCurrentStep(3)
+            if feedback.isCanceled():
+                return {}
+            
+            feedback.setProgressText("rajataan tausta-aineistot valuma-alueelle")
+            #layer = QgsProcessingUtils.mapLayerFromString(jako5_raj, context)
+            D8 = QgsProcessingUtils.mapLayerFromString(parameters['d8'],context)
+            D8= clipRaster3(D8,jako5_raj)
+            FA = QgsProcessingUtils.mapLayerFromString(parameters['fa'],context)
+            FA= clipRaster3(FA,jako5_raj)
+            
+            
+            feedback.setProgressText("")
+            d8_raj = processing.run("grass7:r.reclass",
+                            {'input':D8,
+                            'rules':'',
+                            'txtrules':'1=8\n2=7\n4=6\n8=5\n16=4\n32=3\n64=2\n128=1\n',
+                            'output':QgsProcessing.TEMPORARY_OUTPUT,
+                            'GRASS_REGION_PARAMETER':'',
+                            'GRASS_REGION_CELLSIZE_PARAMETER':0,
+                            'GRASS_RASTER_FORMAT_OPT':'',
+                            'GRASS_RASTER_FORMAT_META':''},context=context, feedback=feedback)
+            
+            feedback.setCurrentStep(4)
+            if feedback.isCanceled():
+                return {}
 
-        jako5_raj = jako5_raj['OUTPUT']
-        jako5_raj.updateExtents()
-        
-        #feedback.pushInfo(str(jako5_raj.extent()))
-        feedback.setCurrentStep(3)
-        if feedback.isCanceled():
-            return {}
-        #layer = QgsProcessingUtils.mapLayerFromString(jako5_raj, context)
-        D8= getWebRasterLayer(jako5_raj,self.D8url,"")
-        feedback.pushInfo(D8[1])
-        
-        DEM = getWebRasterLayer(jako5_raj,self.DEMurl,"")
-        feedback.pushInfo(DEM[1])
-        
-        
+            snap = processing.run("saga:snappointstoraster",
+                        {'INPUT':outputs['LuoTasoPisteest']['OUTPUT'],
+                        'GRID':FA,
+                        'OUTPUT':QgsProcessing.TEMPORARY_OUTPUT,
+                        'MOVES':QgsProcessing.TEMPORARY_OUTPUT,
+                        'DISTANCE':parameters['tartunta'],
+                        'SHAPE':0,
+                        'EXTREME':1},context=context, feedback=feedback)
+            
+            snap = QgsVectorLayer(snap['OUTPUT'],"snap","ogr")
+            feedback.setCurrentStep(5)
+            if feedback.isCanceled():
+                return {}
+            
+            snapfeat = next(snap.getFeatures())
+            srid=str(snap.crs().authid())
+            geom = str(snapfeat.geometry().asPoint().x())+","+str(snapfeat.geometry().asPoint().y())+" ["+srid+"]"
 
-        d8_raj = processing.run("grass7:r.reclass",
-                        {'input':D8[0],
-                         'rules':'',
-                         'txtrules':'1=8\n2=7\n4=6\n8=5\n16=4\n32=3\n64=2\n128=1\n',
-                         'output':QgsProcessing.TEMPORARY_OUTPUT,
-                         'GRASS_REGION_PARAMETER':'',
-                         'GRASS_REGION_CELLSIZE_PARAMETER':0,
-                         'GRASS_RASTER_FORMAT_OPT':'',
-                         'GRASS_RASTER_FORMAT_META':''},context=context, feedback=feedback)
-        
-        feedback.setCurrentStep(4)
-        if feedback.isCanceled():
-            return {}
-
-        snap = processing.run("saga:snappointstoraster",
-                      {'INPUT':outputs['LuoTasoPisteest']['OUTPUT'],
-                       'GRID':DEM[0],
-                       'OUTPUT':QgsProcessing.TEMPORARY_OUTPUT,
-                       'MOVES':QgsProcessing.TEMPORARY_OUTPUT,
-                       'DISTANCE':parameters['tartunta'],
-                       'SHAPE':0,
-                       'EXTREME':0},context=context, feedback=feedback)
-        
-        snap = QgsVectorLayer(snap['OUTPUT'],"snap","ogr")
-        feedback.setCurrentStep(5)
-        if feedback.isCanceled():
-            return {}
-        
-        snapfeat = next(snap.getFeatures())
-        srid=str(snap.crs().authid())
-        geom = str(snapfeat.geometry().asPoint().x())+","+str(snapfeat.geometry().asPoint().y())+" ["+srid+"]"
-
-        basin = processing.run("grass7:r.water.outlet",
-                       {'input':d8_raj['output'],
-                        'coordinates':geom,
-                        'output':QgsProcessing.TEMPORARY_OUTPUT,
-                        'GRASS_REGION_PARAMETER':None,
-                        'GRASS_REGION_CELLSIZE_PARAMETER':0,
-                        'GRASS_RASTER_FORMAT_OPT':'',
-                        'GRASS_RASTER_FORMAT_META':''},context=context, feedback=feedback)
-        
-        feedback.setCurrentStep(6)
-        if feedback.isCanceled():
-            return {}
-        
-        dataset = {'pinta_ala':30.1}
-        df = pd.DataFrame(dataset,index=[0])
-        out = raster2vector2(basin["output"],df)
-        
+            basin = processing.run("grass7:r.water.outlet",
+                        {'input':d8_raj['output'],
+                            'coordinates':geom,
+                            'output':QgsProcessing.TEMPORARY_OUTPUT,
+                            'GRASS_REGION_PARAMETER':None,
+                            'GRASS_REGION_CELLSIZE_PARAMETER':0,
+                            'GRASS_RASTER_FORMAT_OPT':'',
+                            'GRASS_RASTER_FORMAT_META':''},context=context, feedback=feedback)
+            
+            feedback.setCurrentStep(6)
+            if feedback.isCanceled():
+                return {}
+            
+            dataset = {'pinta_ala':30.1}
+            df = pd.DataFrame(dataset,index=[0])
+            out = raster2vector2(basin["output"],df)
+        except Exception as e:
+            feedback.pushWarning(e)
         style = os.path.join(os.path.dirname(__file__),"valumaalue_style.qml")
         feedback.pushInfo(str(style))
         #layer = QgsVectorLayer(vect.source(),'Valuma-alue','ogr')

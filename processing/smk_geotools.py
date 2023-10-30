@@ -4,9 +4,9 @@ from math import sqrt
 import pandas as pd
 import numpy as np
 from qgis.PyQt.QtCore import QVariant
-#from qgis import processing
-import processing
-from qgis.core import QgsVectorLayer,QgsField,QgsFeature,edit,QgsApplication,QgsRectangle,QgsRasterLayer
+from qgis import processing
+#import processing
+from qgis.core import QgsVectorLayer,QgsField,QgsFeature,edit,QgsApplication,QgsRectangle,QgsRasterLayer,QgsRasterPipe,QgsRasterProjector,QgsRasterFileWriter
 from qgis.analysis import QgsInterpolator,QgsIDWInterpolator,QgsGridFileWriter
 
 """
@@ -15,15 +15,14 @@ QgsApplication.setPrefixPath(QgsApplication.prefixPath(), True)
 qgs = QgsApplication([], False)
 qgs.initQgis()
 sys.path.append(os.path.join(QgsApplication.prefixPath(),"python\plugins"))
-import processing
+#import processing
 from processing.core.Processing import Processing
 Processing.initialize()
 #import processing
 #from processing.core.Processing import Processing
 #Processing.initialize()
 #import processing
-from qgis.analysis import QgsNativeAlgorithms
-"""
+from qgis.analysis import QgsNativeAlgorithms"""
 
 
 def feature2Layer(feat,buffer):
@@ -257,6 +256,7 @@ def point2area(input_points,fname,value):
 
 def clipRaster2(input_raster,clip_vector):
     xsize =  int(round(input_raster.rasterUnitsPerPixelX(),0))
+    input_raster.setExtent(clip_vector.extent())
     #ysize = int(round(input_raster.rasterUnitsPerPixelY(),0))
     #orig_name = input_raster.name()
     #print (chm.name())
@@ -278,16 +278,16 @@ def clipRaster2(input_raster,clip_vector):
                 'WIDTH': 1,
                 'OUTPUT':'TEMPORARY_OUTPUT'}
 
-    raster = processing.run('gdal:rasterize', alg_params)
-    raster = QgsRasterLayer(raster['OUTPUT'],"extent","gdal")
-    raster_extent = roundExtent(raster,0)
+    #raster = processing.run('gdal:rasterize', alg_params)
+    #raster = QgsRasterLayer(raster['OUTPUT'],"extent","gdal")
+    raster_extent = roundExtent(clip_vector,0)
 
     alg_params = {
                 'CELLSIZE': xsize,
                 'CRS': None,
                 'EXPRESSION':input_raster.name()+"@1",
                 'EXTENT': raster_extent,
-                'LAYERS': raster,
+                'LAYERS': input_raster,
                 'OUTPUT': 'TEMPORARY_OUTPUT'}
 
     raster_clip = processing.run('qgis:rastercalculator', alg_params)
@@ -296,12 +296,12 @@ def clipRaster2(input_raster,clip_vector):
     
     return raster_clip['OUTPUT']
 
-def roundExtent(raster_layer,decimals:int):
+def roundExtent(layer,decimals:int):
 
 
-    if raster_layer.isValid():
+    if layer.isValid():
         # Get the extent of the raster layer
-        extent = raster_layer.extent()
+        extent = layer.extent()
 
         # Set the number of decimal places to round to
         decimal_places = decimals  # Adjust as needed
@@ -320,3 +320,51 @@ def roundExtent(raster_layer,decimals:int):
         print("Invalid raster layer")
 
     return rounded_extent
+
+def clipRaster3(rlayer,mask_layer):
+    renderer = rlayer.renderer()
+    provider = rlayer.dataProvider()
+    crs = rlayer.crs()
+
+    pipe = QgsRasterPipe()
+    projector = QgsRasterProjector()
+    projector.setCrs(provider.crs(), provider.crs())
+
+    if not pipe.set(provider.clone()):
+        print("Cannot set pipe provider")
+
+    # Commented for extract raw data
+    # if not pipe.set(renderer.clone()):
+        # print("Cannot set pipe renderer")
+
+    if not pipe.insert(2, projector):
+        print("Cannot set pipe projector")
+
+    
+    out_file = tempfile.TemporaryFile()
+    out_file = out_file.name+'.tif'
+    #out_file = 'D:/temp/temporal.tif'
+    file_writer = QgsRasterFileWriter(out_file)
+    file_writer.Mode(1)
+
+    print ("Saving")
+
+    extent = mask_layer.extent()
+
+    opts = ["COMPRESS=LZW"]
+    file_writer.setCreateOptions(opts)
+    error = file_writer.writeRaster(
+        pipe,
+        extent.width (),
+        extent.height(),
+        extent,
+        crs)
+
+    if error == QgsRasterFileWriter.NoError:
+        print ("Raster was saved successfully!")
+        #layer = QgsRasterLayer(out_file, "result")
+        
+    else:
+        print ("Raster was not saved!")
+
+    return out_file
