@@ -220,11 +220,8 @@ class saastopuu_toolsAlgorithm_qgis(QgsProcessingAlgorithm):
                 biogeo = biogeo['OUTPUT']
 
                 outChm = joinIntersection(outChm,fgrid,list(self.grid_fields.split(",")),False)
-                feedback.pushInfo(str(outChm.featureCount()))
                 outChm = joinIntersection(outChm,biogeo,['paajakonro'],False)
-                feedback.pushInfo(str(outChm.featureCount()))
                 outChm = joinIntersection(outChm,leim,['leimikko'],False)
-                feedback.pushInfo(str(outChm.featureCount()))
 
                 feedback.setProgressText("Lasketaan ekologiset arvot puille")
 
@@ -240,22 +237,12 @@ class saastopuu_toolsAlgorithm_qgis(QgsProcessingAlgorithm):
                 #out = outChm
             except Exception as e:
                 feedback.pushWarning(e)
-                #chm = processing.run('gdal:cliprasterbyextent',{'DATA_TYPE': 0,  # Käytä syötetason tietotyyppiä
-                #                                                'EXTRA': '',
-                #                                               'INPUT': parameters['chm'],
-                #                                              'NODATA': None,
-                #                                             'OPTIONS': '',
-                    #                                            'OVERCRS': False,
-                    #                                           'PROJWIN': out,
-                    #                                          'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT}, context=context, feedback=feedback, is_child_algorithm=True)
-                #chm = chm['OUTPUT']
-            idx=[out.fields().indexFromName(n) for n in self.delfields]
-            out.dataProvider().deleteAttributes(idx)
-            out.updateFields()
+   
 
             if current == 0:
                 (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,context,
                     out.fields(), out.wkbType(), out.crs())
+                
             #feedback.pushInfo(str(out.fields().names()))
             outFeats = out.getFeatures()
             for outFeat in outFeats:
@@ -267,21 +254,21 @@ class saastopuu_toolsAlgorithm_qgis(QgsProcessingAlgorithm):
 
         layer = QgsProcessingUtils.mapLayerFromString(dest_id, context)
         layer.loadNamedStyle(style)
-        """
+        
         reareas = point2area(layer,'reTree',1)
         
         (sink, area_id) = self.parameterAsSink(parameters, self.AREAS,context,
                     reareas.fields(), reareas.wkbType(), reareas.crs())
         outFeats = reareas.getFeatures()
-        """
+        
         for outFeat in outFeats:
                 #feedback.pushInfo(str(outFeat['CHM']))
                 sink.addFeature(outFeat, QgsFeatureSink.FastInsert)
         
-        #layer2 = QgsProcessingUtils.mapLayerFromString(area_id, context)
-        #layer2.loadNamedStyle(style2)
+        layer2 = QgsProcessingUtils.mapLayerFromString(area_id, context)
+        layer2.loadNamedStyle(style2)
 
-        return {self.OUTPUT: dest_id}
+        return {self.OUTPUT: dest_id,self.AREAS:area_id}
 
 
     def name(self):
