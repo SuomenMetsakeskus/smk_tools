@@ -34,7 +34,6 @@ from qgis.PyQt.QtGui import QIcon
 import os,sys
 from qgis.core import QgsProcessingProvider
 
-from qgis.core import QgsProcessingProvider
 
 pluginPath = os.path.dirname(__file__)
 #sys.path.append(pluginPath)
@@ -43,7 +42,7 @@ from .processing.saastopuu_algorithm import saastopuu_toolsAlgorithm
 from .processing.suojakaista_algorithm import suojakaista_toolsAlgorithm
 from .processing.suojakaista_algorithm_wbt import suojakaista_toolsAlgorithm_wbt
 from .processing.valumaalue_algorithm import Valumamalli
-#from .processing.saaastopuu_algorithm_qgisdata import saastopuu_toolsAlgorithm_qgis
+from .processing.saaastopuu_algorithm_qgisdata import saastopuu_toolsAlgorithm_qgis
 from .processing.essmodels2points import essmodels2points
 
 
@@ -77,7 +76,7 @@ class smk_toolsProvider(QgsProcessingProvider):
         self.addAlgorithm(suojakaista_toolsAlgorithm())
         self.addAlgorithm(suojakaista_toolsAlgorithm_wbt())
         self.addAlgorithm(saastopuu_toolsAlgorithm())
-        #self.addAlgorithm(saastopuu_toolsAlgorithm_qgis())
+        self.addAlgorithm(saastopuu_toolsAlgorithm_qgis())
         self.addAlgorithm(Valumamalli())
         self.addAlgorithm(essmodels2points())
         #self.addAlgorithm(focal_toolsAlgorithm())

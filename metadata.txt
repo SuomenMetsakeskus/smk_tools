@@ -10,11 +10,11 @@
 name=smk luontotyökalut
 qgisMinimumVersion=3.26
 description=Find the retention tree groups and riparian buffer zone area with given polygon
-version=1.1.4
+version=1.1.5
 author=Suomen metsäkeskus
 email=luontotieto@metsakeskus.fi
 
-about=This plugin finds the retention tree groups and riparian buffer zone area with given polygon. Open "Processing Toolbox -- Suomen metsakeskus" to use this plugin after installation.
+about=This plugin finds the retention tree groups and riparian buffer zone area with given polygon. The tools works only in Finland due to interface data in backgroud. Open "Processing Toolbox -- Suomen metsakeskus" to use this plugin after installation.
 
 tracker=https://github.com/SuomenMetsakeskus/smk_tools/issues
 repository=https://github.com/SuomenMetsakeskus/smk_tools

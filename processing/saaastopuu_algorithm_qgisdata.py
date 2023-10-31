@@ -48,7 +48,7 @@ import os,time,sys
 sys.path.append(os.path.dirname(__file__))
 #from PIL import Image
 from getInput import getWebRasterLayer,getWebVectorLayer,getProtectedSites
-from smk_geotools import feature2Layer,createTreeMap,addFieldValue,joinIntersection,point2area,clipRaster2
+from smk_geotools import feature2Layer,createTreeMap,addFieldValue,joinIntersection,point2area,clipRaster3
 from smk_essmodels import runEssModel
 #from saastopuu import *
 pluginPath = os.path.abspath(
@@ -99,12 +99,12 @@ class saastopuu_toolsAlgorithm_qgis(QgsProcessingAlgorithm):
         """
 
         #inputs
-        self.addParameter(QgsProcessingParameterFeatureSource(self.INPUT,self.tr('Leimikko'),[QgsProcessing.TypeVectorPolygon]))
-        self.addParameter(QgsProcessingParameterMapLayer('chm', 'Latvusmalli', defaultValue=None, types=[QgsProcessing.TypeRaster]))
-        self.addParameter(QgsProcessingParameterMapLayer('dtw', 'DTW', defaultValue=None,types=[QgsProcessing.TypeRaster]))
-        self.addParameter(QgsProcessingParameterMapLayer('vegetationzone', 'Metsäkasvillisyysvyöhyke', defaultValue=None, types=[QgsProcessing.TypeVectorPolygon]))
-        self.addParameter(QgsProcessingParameterMapLayer('waterdistance', 'Etäisyys vesistöön', defaultValue=None, types=[QgsProcessing.TypeRaster]))
-        self.addParameter(QgsProcessingParameterMapLayer('forestgrid', 'Hila-aineisto', types=[QgsProcessing.TypeVectorPolygon]))
+        self.addParameter(QgsProcessingParameterFeatureSource(self.INPUT,self.tr('Leimikko'),[QgsProcessing.TypeVectorPolygon],defaultValue='cuttingarea'))
+        self.addParameter(QgsProcessingParameterMapLayer('chm', 'Latvusmalli', defaultValue='uusinCHM', types=[QgsProcessing.TypeRaster]))
+        self.addParameter(QgsProcessingParameterMapLayer('dtw', 'DTW', defaultValue='dtw04ha',types=[QgsProcessing.TypeRaster]))
+        self.addParameter(QgsProcessingParameterMapLayer('vegetationzone', 'Metsäkasvillisyysvyöhyke', defaultValue='vegetationzones', types=[QgsProcessing.TypeVectorPolygon]))
+        self.addParameter(QgsProcessingParameterMapLayer('waterdistance', 'Etäisyys vesistöön', defaultValue='distance2water', types=[QgsProcessing.TypeRaster]))
+        self.addParameter(QgsProcessingParameterMapLayer('forestgrid', 'Hila-aineisto', defaultValue='gridcell',types=[QgsProcessing.TypeVectorPolygon]))
         #self.addParameter(QgsProcessingParameterRasterDestination('LeikattuLatvus', 'leikattu latvus', createByDefault=True, defaultValue=None))
         #self.addParameter(QgsProcessingParameterFeatureSink('LeikattuHila', 'Leikattu hila', type=QgsProcessing.TypeVectorAnyGeometry, createByDefault=True, defaultValue=None))
         #self.addParameter(QgsProcessingParameterFeatureSink('outpisteet', 'outpisteet', type=QgsProcessing.TypeVectorPoint, createByDefault=True, defaultValue=None))
@@ -176,13 +176,13 @@ class saastopuu_toolsAlgorithm_qgis(QgsProcessingAlgorithm):
             
             try:
                 chm = QgsProcessingUtils.mapLayerFromString(parameters['chm'],context)
-                chm = clipRaster2(chm,out)
+                chm = clipRaster3(chm,out)
                 
                 dtw = QgsProcessingUtils.mapLayerFromString(parameters['dtw'],context)
-                dtw = clipRaster2(dtw,out)
+                dtw = clipRaster3(dtw,out)
                 
                 euc = QgsProcessingUtils.mapLayerFromString(parameters['waterdistance'],context)
-                euc = clipRaster2(euc,out)
+                euc = clipRaster3(euc,out)
                 
                 #fgrid = QgsProcessingUtils.mapLayerFromString(parameters['forestgrid'],context)
                 #biogeo = QgsProcessingUtils.mapLayerFromString(parameters['vegetaionzone'],context)
