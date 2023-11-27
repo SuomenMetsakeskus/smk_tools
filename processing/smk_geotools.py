@@ -242,7 +242,7 @@ def point2area(input_points,fname,value):
                                     'OUTPUT':'TEMPORARY_OUTPUT'})['OUTPUT']
 
     buf = processing.run("native:buffer", {'INPUT':buf1,
-                                    'DISTANCE':-11,
+                                    'DISTANCE':-12,
                                     'SEGMENTS':5,
                                     'END_CAP_STYLE':0,
                                     'JOIN_STYLE':0,
@@ -366,5 +366,63 @@ def clipRaster3(rlayer,mask_layer):
         
     else:
         print ("Raster was not saved!")
+
+    return out_file
+
+def clipRaster4(rlayer,mask_layer,outfolder,rastername):
+    renderer = rlayer.renderer()
+    provider = rlayer.dataProvider()
+    crs = rlayer.crs()
+
+    pipe = QgsRasterPipe()
+    projector = QgsRasterProjector()
+    projector.setCrs(provider.crs(), provider.crs())
+
+    if not pipe.set(provider.clone()):
+        print("Cannot set pipe provider")
+
+    # Commented for extract raw data
+    # if not pipe.set(renderer.clone()):
+        # print("Cannot set pipe renderer")
+
+    if not pipe.insert(2, projector):
+        print("Cannot set pipe projector")
+
+    
+    #out_file = tempfile.TemporaryFile()
+    #out_file = out_file.name+'.tif'
+    #out_file = 'D:/temp/temporal.tif'
+    out_file = os.path.join(outfolder,"raster_"+str(rastername))
+    file_writer = QgsRasterFileWriter(out_file)
+    file_writer.Mode(0)
+
+    print ("Saving")
+
+    extent = mask_layer.extent()
+
+    opts = ["COMPRESS=LZW"]
+    file_writer.setCreateOptions(opts)
+    error = file_writer.writeRaster(
+        pipe,
+        extent.width (),
+        extent.height(),
+        extent,
+        crs)
+
+    if error == QgsRasterFileWriter.NoError:
+        print ("Raster was saved successfully!")
+        #layer = QgsRasterLayer(out_file, "result")
+        
+    else:
+        print ("Raster was not saved!")
+
+    chm = gdal.Open(out_file)
+    
+    chmB = chm.GetRasterBand(1)
+    chmA = chmB.ReadAsArray()
+    
+    chmA = -0.118*chmA+30.1567 #vaihe 1
+
+    gdal_array.SaveArray(chmA.astype("float32"),out_file,"GTiff",chm)
 
     return out_file
