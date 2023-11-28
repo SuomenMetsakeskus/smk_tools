@@ -1,5 +1,17 @@
+# -*- coding: utf-8 -*-
+
+__author__ = 'Suomen metsäkeskus'
+__date__ = '2022-10-04'
+__copyright__ = '(C) 2022 by Suomen metsäkeskus'
+
+# This will get replaced with a git SHA1 when you do a git archive
+
+__revision__ = '$Format:%H$'
+from stat import S_ISLNK
+
+
 import os,sys
-import processing
+from qgis import processing
 import pandas as pd
 from qgis.utils import iface
 from osgeo import gdal,gdal_array
