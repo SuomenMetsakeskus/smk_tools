@@ -23,7 +23,7 @@ from qgis.core import (QgsProcessing,
                        QgsFeatureRequest,
                        QgsRasterLayer)
 
-
+sys.path.append(os.path.dirname(__file__))
 from smkluoto_geotools import *
 
 
