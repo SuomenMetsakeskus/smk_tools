@@ -36,7 +36,7 @@ from qgis.core import (QgsProcessing,
                        QgsRasterLayer)
 
 sys.path.append(os.path.dirname(__file__))
-from smkluoto_geotools import *
+from .smkluoto_geotools import *
 
 
 class Valumamalli_fi(QgsProcessingAlgorithm):
