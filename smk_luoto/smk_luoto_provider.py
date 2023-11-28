@@ -31,8 +31,8 @@ __copyright__ = '(C) 2023 by Suomen metsäkeskus'
 __revision__ = '$Format:%H$'
 
 from qgis.core import QgsProcessingProvider
-from .smk_luoto_algorithm import SMK_LuotoAlgorithm
-
+#from .smk_luoto_algorithm import SMK_LuotoAlgorithm
+from .valumaalue_algorithm import Valumamalli_fi
 
 class SMK_LuotoProvider(QgsProcessingProvider):
 
@@ -53,7 +53,7 @@ class SMK_LuotoProvider(QgsProcessingProvider):
         """
         Loads all algorithms belonging to this provider.
         """
-        self.addAlgorithm(SMK_LuotoAlgorithm())
+        self.addAlgorithm(Valumamalli_fi())
         # add additional algorithms here
         # self.addAlgorithm(MyOtherAlgorithm())
 
