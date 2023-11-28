@@ -8,7 +8,7 @@
      <file_name>smk_tools.zip</file_name>
      <author_name>SuomenMetsakeskus</author_name>
      <email>luontotieto@metsakeskus.fi</email>
-     <download_url>https://github.com/SuomenMetsakeskus/smk_tools/raw/main/smk_tools.zip</download_url>
+     <download_url>https://github.com/MikkoKesala/smk_tools/raw/main/smk_tools/smk_tools.zip</download_url>
  </pyqgis_plugin>
  <pyqgis_plugin name="smk luoto" version="0.1.0">
      <description>Suomen metsäkeskuksen Luoto-sovelluksen geoprosessointimallit</description>
@@ -18,6 +18,6 @@
      <file_name>smk_luoto.zip</file_name>
      <author_name>SuomenMetsakeskus</author_name>
      <email>luontotieto@metsakeskus.fi</email>
-     <download_url>https://github.com/SuomenMetsakeskus/smk_tools/raw/main/smk_luoto.zip</download_url>
+     <download_url>https://github.com/MikkoKesala/smk_tools/raw/main/smk_luoto/smk_luoto.zip</download_url>
  </pyqgis_plugin>
 </plugins>
