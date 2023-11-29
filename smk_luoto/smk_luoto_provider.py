@@ -36,10 +36,7 @@ from qgis.PyQt.QtGui import QIcon
 from .valumaalue_algorithm import Valumamalli_fi
 import os
 
-pluginPath = os.path.abspath(
-    os.path.join(
-        os.path.dirname(__file__),
-        os.pardir))
+pluginPath = os.path.dirname(os.path.abspath(__file__))
 
 class SMK_LuotoProvider(QgsProcessingProvider):
 
@@ -87,7 +84,7 @@ class SMK_LuotoProvider(QgsProcessingProvider):
         the Processing toolbox.
         """
         
-        return QIcon(os.path.join(pluginPath, 'icon.jpg'))
+        return QIcon(os.path.join(pluginPath, 'planet.png'))
 
     def longName(self):
         """

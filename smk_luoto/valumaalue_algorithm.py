@@ -7,42 +7,26 @@ __copyright__ = '(C) 2022 by Suomen metsäkeskus'
 # This will get replaced with a git SHA1 when you do a git archive
 
 __revision__ = '$Format:%H$'
-from stat import S_ISLNK
-
 
 import os,sys
 from qgis import processing
 import pandas as pd
-from qgis.utils import iface
-from osgeo import gdal,gdal_array
-from qgis.PyQt.QtCore import QCoreApplication
 from qgis.PyQt.QtGui import QIcon
 from qgis.core import (QgsProcessing,
                        QgsFeatureSink,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterNumber,
                        QgsProcessingParameterPoint,
-                       QgsProcessingParameterRasterLayer,
-                       QgsProcessingParameterVectorDestination,
                        QgsVectorLayer,
-                       QgsProcessingParameterBoolean,
-                       QgsProcessingParameterFeatureSource,
                        QgsProcessingParameterFeatureSink,
                        QgsProcessingUtils,
-                       QgsProcessingParameterDefinition,
                        QgsProcessingMultiStepFeedback,
-                       QgsProcessingFeatureSourceDefinition,
-                       QgsFeatureRequest,
                        QgsRasterLayer)
 
 sys.path.append(os.path.dirname(__file__))
 from .smkluoto_geotools import *
 
-pluginPath = os.path.abspath(
-    os.path.join(
-        os.path.dirname(__file__),
-        os.pardir))
-
+pluginPath = os.path.dirname(os.path.abspath(__file__))
 
 class Valumamalli_fi(QgsProcessingAlgorithm):
     jako5 = QgsVectorLayer("crs='EPSG:3067' url='https://aineistot.metsakeskus.fi/metsakeskus/rest/services/Luontotieto/Valumaalueet_t5/MapServer/0' http-header:referer=''","jako5","arcgisfeatureserver")
