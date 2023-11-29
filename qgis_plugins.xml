@@ -10,7 +10,7 @@
      <email>luontotieto@metsakeskus.fi</email>
      <download_url>https://github.com/MikkoKesala/smk_tools/raw/main/smk_tools/smk_tools.zip</download_url>
  </pyqgis_plugin>
- <pyqgis_plugin name="smk luoto" version="0.1.1">
+ <pyqgis_plugin name="smk luoto" version="0.1.2">
      <description>Suomen metsäkeskuksen Luoto-sovelluksen geoprosessointimallit</description>
      <homepage>https://www.metsakeskus.fi/fi/avoin-metsa-ja-luontotieto/aineistot-paikkatieto-ohjelmille/tyokalut</homepage>
      <qgis_minimum_version>3.2</qgis_minimum_version>

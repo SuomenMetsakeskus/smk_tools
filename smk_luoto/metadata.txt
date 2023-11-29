@@ -6,7 +6,7 @@
 name=SMK_Luoto
 qgisMinimumVersion=3.2
 description=Metsäkeskuksen Luoto-sovelluksen työkalut
-version=0.1.1
+version=0.1.2
 author=Suomen metsäkeskus
 email=luontotieto@metsakeskus.fi
 

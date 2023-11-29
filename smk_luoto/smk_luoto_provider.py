@@ -34,6 +34,12 @@ from qgis.core import QgsProcessingProvider
 from qgis.PyQt.QtGui import QIcon
 #from .smk_luoto_algorithm import SMK_LuotoAlgorithm
 from .valumaalue_algorithm import Valumamalli_fi
+import os
+
+pluginPath = os.path.abspath(
+    os.path.join(
+        os.path.dirname(__file__),
+        os.pardir))
 
 class SMK_LuotoProvider(QgsProcessingProvider):
 
@@ -80,9 +86,8 @@ class SMK_LuotoProvider(QgsProcessingProvider):
         Should return a QIcon which is used for your provider inside
         the Processing toolbox.
         """
-        icon = QIcon('planet.png')
         
-        return icon
+        return QIcon(os.path.join(pluginPath, 'icon.jpg'))
 
     def longName(self):
         """

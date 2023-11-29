@@ -38,6 +38,11 @@ from qgis.core import (QgsProcessing,
 sys.path.append(os.path.dirname(__file__))
 from .smkluoto_geotools import *
 
+pluginPath = os.path.abspath(
+    os.path.join(
+        os.path.dirname(__file__),
+        os.pardir))
+
 
 class Valumamalli_fi(QgsProcessingAlgorithm):
     jako5 = QgsVectorLayer("crs='EPSG:3067' url='https://aineistot.metsakeskus.fi/metsakeskus/rest/services/Luontotieto/Valumaalueet_t5/MapServer/0' http-header:referer=''","jako5","arcgisfeatureserver")
@@ -218,7 +223,7 @@ class Valumamalli_fi(QgsProcessingAlgorithm):
 
     def icon(self):
         
-        return QIcon('planet.png')
+        return QIcon(os.path.join(pluginPath, 'planet.png'))
     
     def group(self):
         """
