@@ -31,6 +31,7 @@ __copyright__ = '(C) 2023 by Suomen metsäkeskus'
 __revision__ = '$Format:%H$'
 
 from qgis.core import QgsProcessingProvider
+from qgis.PyQt.QtGui import QIcon
 #from .smk_luoto_algorithm import SMK_LuotoAlgorithm
 from .valumaalue_algorithm import Valumamalli_fi
 
@@ -79,7 +80,9 @@ class SMK_LuotoProvider(QgsProcessingProvider):
         Should return a QIcon which is used for your provider inside
         the Processing toolbox.
         """
-        return QgsProcessingProvider.icon(self)
+        icon = QIcon('planet.png')
+        
+        return icon
 
     def longName(self):
         """

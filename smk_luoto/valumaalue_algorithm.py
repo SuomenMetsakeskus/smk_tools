@@ -216,6 +216,10 @@ class Valumamalli_fi(QgsProcessingAlgorithm):
         """
         return 'Valuma-alueen määritys'
 
+    def icon(self):
+        
+        return QIcon('planet.png')
+    
     def group(self):
         """
         Returns the name of the group this algorithm belongs to. This string
