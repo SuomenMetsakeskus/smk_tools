@@ -77,7 +77,7 @@ class saastopuu_toolsAlgorithm(QgsProcessingAlgorithm):
     grid_data = 'https://avoin.metsakeskus.fi/rajapinnat/v1/gridcell/ows?'
     stand_data = 'https://avoin.metsakeskus.fi/rajapinnat/v1/stand/ows?'
     dtw_data = 'https://paituli.csc.fi/geoserver/paituli/wcs?'
-    mkasviv_data = 'https://paikkatieto.ymparisto.fi/arcgis/rest/services/INSPIRE/SYKE_EliomaantieteellisetAlueet/MapServer/0'
+    mkasviv_data = 'https://paikkatiedot.ymparisto.fi/geoserver/inspire_br/wms?service=WMS&version=1.3.0'
     euc_data = 'https://aineistot.metsakeskus.fi/metsakeskus/rest/services/Vesiensuojelu/euclidean/ImageServer'
     
     stand_name = 'stand'
@@ -87,7 +87,7 @@ class saastopuu_toolsAlgorithm(QgsProcessingAlgorithm):
 
     stand_fields = 'SPECIALFEATURECODE,SPECIALFEATUREADDITIONALCODE,GEOMETRY'
     grid_fields = 'GEOMETRY,FERTILITYCLASS,DEVELOPMENTCLASS,STEMCOUNTPINE,STEMCOUNTDECIDUOUS,STEMCOUNTSPRUCE,MEANDIAMETERDECIDUOUS,MEANDIAMETERPINE,MEANDIAMETERSPRUCE,MEANHEIGHTDECIDUOUS,MEANHEIGHTPINE,MEANHEIGHTSPRUCE'
-    mkasviv_fields = 'PaajakoNro,Nimi'
+    mkasviv_fields = 'paajakonro,nimi'
 
 
     def initAlgorithm(self, config):
